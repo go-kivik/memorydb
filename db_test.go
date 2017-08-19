@@ -1,11 +1,10 @@
 package memorydb
 
 import (
+	"context"
 	"encoding/json"
 	"strings"
 	"testing"
-
-	"golang.org/x/net/context"
 
 	"github.com/flimzy/diff"
 	"github.com/flimzy/kivik"

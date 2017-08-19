@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/go-kivik/memorydb.svg?branch=master)](https://travis-ci.org/go-kivik/memorydb)  [![GoDoc](https://godoc.org/github.com/go-kivik/memorydb?status.svg)](http://godoc.org/github.com/go-kivik/memorydb)
+[![Build Status](https://travis-ci.org/go-kivik/memorydb.svg?branch=master)](https://travis-ci.org/go-kivik/memorydb) [![Codecov](https://img.shields.io/codecov/c/github/go-kivik/memorydb.svg?style=flat)](https://codecov.io/gh/go-kivik/memorydb) [![GoDoc](https://godoc.org/github.com/go-kivik/memorydb?status.svg)](http://godoc.org/github.com/go-kivik/memorydb)
 
 # Kivik MemoryDB
 

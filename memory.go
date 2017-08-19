@@ -1,4 +1,4 @@
-// Package memory provides a memory-backed Kivik driver, intended for testing.
+// Package memorydb provides a memory-backed Kivik driver, intended for testing.
 package memorydb
 
 import (
@@ -60,8 +60,8 @@ func (c *client) DBExists(_ context.Context, dbName string, _ map[string]interfa
 // Copied verbatim from http://docs.couchdb.org/en/2.0.0/api/database/common.html#head--db
 var validDBName = regexp.MustCompile("^[a-z][a-z0-9_$()+/-]*$")
 var validNames = map[string]struct{}{
-	"_users":      struct{}{},
-	"_replicator": struct{}{},
+	"_users":      {},
+	"_replicator": {},
 }
 
 func (c *client) CreateDB(ctx context.Context, dbName string, options map[string]interface{}) error {
