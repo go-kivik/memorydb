@@ -31,11 +31,10 @@ type revision struct {
 }
 
 type database struct {
-	mu        sync.RWMutex
-	docs      map[string]*document
-	deleted   bool
-	security  *driver.Security
-	updateSeq int64
+	mu       sync.RWMutex
+	docs     map[string]*document
+	deleted  bool
+	security *driver.Security
 }
 
 var rnd *rand.Rand

@@ -1,4 +1,4 @@
-// Package memory provides a memory-backed Kivik driver, intended for testing.
+// Package memorydb provides a memory-backed Kivik driver, intended for testing.
 package memorydb
 
 import (

@@ -18,19 +18,8 @@ var notYetImplemented = errors.Status(kivik.StatusNotImplemented, "kivik: not ye
 // database is an in-memory database representation.
 type db struct {
 	*client
-	dbName   string
-	db       *database
-	security *kivik.Security
-}
-
-type indexDoc struct {
-	ID    string        `json:"id"`
-	Key   string        `json:"key"`
-	Value indexDocValue `json:"value"`
-}
-
-type indexDocValue struct {
-	Rev string `json:"rev"`
+	dbName string
+	db     *database
 }
 
 func (d *db) Query(ctx context.Context, ddoc, view string, opts map[string]interface{}) (driver.Rows, error) {
