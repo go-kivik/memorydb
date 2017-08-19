@@ -1,5 +1,5 @@
 // Package memory provides a memory-backed Kivik driver, intended for testing.
-package memory
+package memorydb
 
 import (
 	"context"
