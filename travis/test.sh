@@ -16,7 +16,7 @@ go test -race $(go list ./... | grep -v /vendor/)
 
 # Only run GopherJS tests,  Linter and coveragetests on Linux/Go 1.8
 if [[ ${TRAVIS_OS_NAME} == "linux" && ${TRAVIS_GO_VERSION} == 1.8.* ]]; then
-    gopherjs test
+    gopherjs test $(go list ./... | grep -v /vendor/)
 
     # Linter
     diff -u <(echo -n) <(gofmt -e -d $(find . -type f -name '*.go' -not -path "./vendor/*"))
