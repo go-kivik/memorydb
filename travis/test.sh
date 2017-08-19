@@ -12,19 +12,18 @@ function join_list {
     echo "$*"
 }
 
-case "$1" in
-    "standard")
-        go test -race $(go list ./... | grep -v /vendor/ | grep -v /pouchdb)
-    ;;
-    "gopherjs")
-        gopherjs test $(go list ./... | grep -v /vendor/ | grep -Ev 'kivik/(serve|auth|proxy)')
-    ;;
-    "linter")
-        diff -u <(echo -n) <(gofmt -e -d $(find . -type f -name '*.go' -not -path "./vendor/*"))
-        go install # to make gotype (run by gometalinter) happy
-        gometalinter.v1 --config .linter_test.json
-        gometalinter.v1 --config .linter.json
-    ;;
-    "coverage")
-        go test -race -coverprofile=coverage.txt -covermode=atomic && bash <(curl -s https://codecov.io/bash)
-esac
+go test -race $(go list ./... | grep -v /vendor/)
+
+# Only run GopherJS tests,  Linter and coveragetests on Linux/Go 1.8
+if [[ ${TRAVIS_OS_NAME} == "linux" && ${TRAVIS_GO_VERSION} == 1.8.* ]]; then
+    gopherjs test
+
+    # Linter
+    diff -u <(echo -n) <(gofmt -e -d $(find . -type f -name '*.go' -not -path "./vendor/*"))
+    go install # to make gotype (run by gometalinter) happy
+    gometalinter.v1 --config .linter_test.json
+    gometalinter.v1 --config .linter.json
+
+    # Coverage
+    go test -coverprofile=coverage.txt -covermode=set && bash <(curl -s https://codecov.io/bash)
+fi

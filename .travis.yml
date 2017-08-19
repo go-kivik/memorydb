@@ -23,26 +23,12 @@ go:
   - 1.7.x
   - 1.8.x
   - master
-env:
-    matrix:
-        - MODE=standard
-
 matrix:
     allow_failures:
         - go: master
-    include:
-        - go: 1.8.x
-          env: MODE=gopherjs
-        - go: 1.8.x
-          env: MODE=gopherjs
-          os: osx
-        - go: 1.8.x
-          env: MODE=linter
-        - go: 1.8.x
-          env: MODE=coverage
 
 install:
-    - ./travis/install.sh $MODE
+    - ./travis/install.sh
 
 script:
-    - ./travis/test.sh $MODE
+    - ./travis/test.sh
