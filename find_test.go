@@ -266,13 +266,13 @@ func TestFilterDoc(t *testing.T) {
 		},
 		{
 			name:     "with filter",
-			rows:     &findResults{fields: map[string]struct{}{"foo": struct{}{}}},
+			rows:     &findResults{fields: map[string]struct{}{"foo": {}}},
 			data:     `{"foo":"bar", "baz":"qux"}`,
 			expected: `{"foo":"bar"}`,
 		},
 		{
 			name: "invalid json",
-			rows: &findResults{fields: map[string]struct{}{"foo": struct{}{}}},
+			rows: &findResults{fields: map[string]struct{}{"foo": {}}},
 			data: `{"foo":"bar", "baz":"qux}`,
 			err:  "unexpected end of JSON input",
 		},
