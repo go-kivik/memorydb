@@ -277,3 +277,15 @@ func TestDB(t *testing.T) {
 		}(test)
 	}
 }
+
+func TestClientVersion(t *testing.T) {
+	expected := &driver.Version{}
+	c := &client{version: expected}
+	result, err := c.Version(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result != expected {
+		t.Errorf("Wrong version object returned")
+	}
+}
