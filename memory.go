@@ -3,13 +3,14 @@ package memorydb
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"regexp"
 	"sync"
 
 	"github.com/flimzy/kivik"
 	"github.com/flimzy/kivik/driver"
-	"github.com/flimzy/kivik/driver/common"
 	"github.com/flimzy/kivik/errors"
 )
 
@@ -22,9 +23,9 @@ func init() {
 }
 
 type client struct {
-	*common.Client
-	mutex sync.RWMutex
-	dbs   map[string]*database
+	version *driver.Version
+	mutex   sync.RWMutex
+	dbs     map[string]*database
 }
 
 var _ driver.Client = &client{}
@@ -37,8 +38,12 @@ const (
 
 func (d *memDriver) NewClient(_ context.Context, name string) (driver.Client, error) {
 	return &client{
-		Client: common.NewClient(Version, Vendor),
-		dbs:    make(map[string]*database),
+		version: &driver.Version{
+			Version:     Version,
+			Vendor:      Vendor,
+			RawResponse: json.RawMessage(fmt.Sprintf(`{"version":"%s","vendor":{"name":"%s"}}`, Version, Vendor)),
+		},
+		dbs: make(map[string]*database),
 	}, nil
 }
 
@@ -104,4 +109,9 @@ func (c *client) DB(ctx context.Context, dbName string, options map[string]inter
 		dbName: dbName,
 		db:     c.dbs[dbName],
 	}, nil
+}
+
+// Version returns the configured server info.
+func (c *client) Version(_ context.Context) (*driver.Version, error) {
+	return c.version, nil
 }
