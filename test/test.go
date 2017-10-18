@@ -67,6 +67,7 @@ func RegisterMemoryDBSuite() {
 		"Find/RW/group/Admin/Warning.warning":  "no matching index found, create an index to optimize query time",
 		"Find/RW/group/NoAuth/Warning.warning": "no matching index found, create an index to optimize query time",
 
+		"Explain.skip":           true,                       // FIXME: Unimplemented
 		"Stats.skip":             true,                       // FIXME: Unimplemented
 		"Compact.skip":           true,                       // FIXME: Unimplemented
 		"DBUpdates.status":       kivik.StatusNotImplemented, // FIXME: Unimplemented
