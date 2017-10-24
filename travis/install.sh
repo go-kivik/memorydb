@@ -2,20 +2,14 @@
 set -euC
 set -o xtrace
 
-if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-    brew install glide
-fi
-
 glide update
 
 # Only run GopherJS tests and Linter tests on Linux/Go 1.9
-if [[ ${TRAVIS_OS_NAME} == "linux" && ${TRAVIS_GO_VERSION} == 1.9* ]]; then
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-        # Install nodejs and dependencies, but only for Linux
-        curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
-        sudo apt-get update -qq
-        sudo apt-get install -y nodejs
-    fi
+if [[ ${TRAVIS_GO_VERSION} == 1.9* ]]; then
+    # Install nodejs and dependencies, but only for Linux
+    curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+    sudo apt-get update -qq
+    sudo apt-get install -y nodejs
     npm install
     # Install Go deps only needed by PouchDB driver/GopherJS
     [ -e glide.gopherjs.yaml ] && glide -y glide.gopherjs.yaml install
