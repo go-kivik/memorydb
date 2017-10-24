@@ -3,7 +3,7 @@ package test
 import (
 	"testing"
 
-	_ "github.com/flimzy/kivik/driver/memory"
+	_ "github.com/go-kivik/memorydb"
 )
 
 func init() {

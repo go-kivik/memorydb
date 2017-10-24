@@ -17,16 +17,12 @@ language: go
 
 os:
   - linux
-  - osx
 
 go:
   - 1.7.x
   - 1.8.x
   - 1.9.x
   - master
-env:
-    global:
-        - HOMEBREW_NO_AUTO_UPDATE=1
 matrix:
     allow_failures:
         - go: master
