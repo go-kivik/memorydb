@@ -11,6 +11,5 @@ import:
   - errors
 - package: github.com/go-kivik/mango
   version: ^0.0.1
-testImport:
 - package: github.com/flimzy/diff
-  version: ^0.1.2
+  version: ~0.1.2
