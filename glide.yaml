@@ -7,7 +7,6 @@ import:
   version: ^1.0.5
   subpackages:
   - driver
-  - driver/util
   - errors
 - package: github.com/go-kivik/mango
   version: ^0.0.1

@@ -1,13 +1,14 @@
 package memorydb
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"io"
+	"strings"
 
 	"github.com/flimzy/kivik/driver"
-	"github.com/flimzy/kivik/driver/util"
 	"github.com/go-kivik/mango"
 )
 
@@ -58,7 +59,7 @@ func (d *db) DeleteIndex(_ context.Context, ddoc, name string) error {
 }
 
 func (d *db) Find(_ context.Context, query interface{}) (driver.Rows, error) {
-	queryJSON, err := util.ToJSON(query)
+	queryJSON, err := toJSON(query)
 	if err != nil {
 		return nil, err
 	}
@@ -141,4 +142,21 @@ func (r *findResults) filterDoc(data []byte) ([]byte, error) {
 		}
 	}
 	return json.Marshal(intermediateDoc)
+}
+
+// toJSON converts a string, []byte, json.RawMessage, or an arbitrary type into
+// an io.Reader of JSON marshaled data.
+func toJSON(i interface{}) (io.Reader, error) {
+	switch t := i.(type) {
+	case string:
+		return strings.NewReader(t), nil
+	case []byte:
+		return bytes.NewReader(t), nil
+	case json.RawMessage:
+		return bytes.NewReader(t), nil
+	default:
+		buf := &bytes.Buffer{}
+		err := json.NewEncoder(buf).Encode(i)
+		return buf, err
+	}
 }

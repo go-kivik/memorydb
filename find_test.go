@@ -1,6 +1,7 @@
 package memorydb
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"strings"
@@ -292,6 +293,54 @@ func TestFilterDoc(t *testing.T) {
 			}
 			if d := diff.JSON([]byte(test.expected), result); d != nil {
 				t.Error(d)
+			}
+		})
+	}
+}
+
+func TestToJSON(t *testing.T) {
+	type tjTest struct {
+		Name     string
+		Input    interface{}
+		Expected string
+	}
+	tests := []tjTest{
+		{
+			Name:     "Null",
+			Expected: "null",
+		},
+		{
+			Name:     "String",
+			Input:    `{"foo":"bar"}`,
+			Expected: `{"foo":"bar"}`,
+		},
+		{
+			Name:     "ByteSlice",
+			Input:    []byte(`{"foo":"bar"}`),
+			Expected: `{"foo":"bar"}`,
+		},
+		{
+			Name:     "RawMessage",
+			Input:    json.RawMessage(`{"foo":"bar"}`),
+			Expected: `{"foo":"bar"}`,
+		},
+		{
+			Name:     "Interface",
+			Input:    map[string]string{"foo": "bar"},
+			Expected: `{"foo":"bar"}`,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			r, err := toJSON(test.Input)
+			if err != nil {
+				t.Fatalf("jsonify failed: %s", err)
+			}
+			buf := &bytes.Buffer{}
+			_, _ = buf.ReadFrom(r)
+			result := strings.TrimSpace(buf.String())
+			if result != test.Expected {
+				t.Errorf("Expected: `%s`\n  Actual: `%s`", test.Expected, result)
 			}
 		})
 	}
