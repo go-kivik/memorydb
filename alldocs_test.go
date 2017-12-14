@@ -7,7 +7,8 @@ import (
 	"testing"
 
 	"github.com/flimzy/diff"
-	"github.com/flimzy/kivik/driver"
+
+	"github.com/go-kivik/kivik/driver"
 )
 
 func TestAllDocsClose(t *testing.T) {

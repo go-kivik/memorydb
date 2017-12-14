@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/flimzy/kivik/driver"
+	"github.com/go-kivik/kivik/driver"
 )
 
 func (d *db) AllDocs(ctx context.Context, opts map[string]interface{}) (driver.Rows, error) {
