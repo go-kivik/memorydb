@@ -8,7 +8,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/flimzy/kivik/driver"
+	"github.com/go-kivik/kivik/driver"
 	"github.com/go-kivik/mango"
 )
 

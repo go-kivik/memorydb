@@ -3,8 +3,8 @@ ignore:
 - github.com/gopherjs/gopherjs
 - github.com/gopherjs/jsbuiltin
 import:
-- package: github.com/flimzy/kivik
-  version: ^1.0.5
+- package: github.com/go-kivik/kivik
+  version: master
   subpackages:
   - driver
   - errors
