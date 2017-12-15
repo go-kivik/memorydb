@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/flimzy/diff"
+	"github.com/flimzy/testy"
 
 	"github.com/go-kivik/kivik"
 	"github.com/go-kivik/kivik/driver"
@@ -240,27 +241,14 @@ func TestPut(t *testing.T) {
 				} else {
 					db = setupDB(t, nil)
 				}
-				var msg string
-				var status int
-				if _, err := db.Put(context.Background(), test.DocID, test.Doc); err != nil {
-					msg = err.Error()
-					status = kivik.StatusCode(err)
-				}
-				if msg != test.Error {
-					t.Errorf("Unexpected error: %s", msg)
-				}
-				if status != test.Status {
-					t.Errorf("Unexpected status code: %d", status)
-				}
-				if msg != "" {
-					return
-				}
-				resultJSON, err := db.Get(context.Background(), test.DocID, nil)
+				_, err := db.Put(context.Background(), test.DocID, test.Doc)
+				testy.StatusError(t, test.Error, test.Status, err)
+				_, doc, err := db.Get(context.Background(), test.DocID, nil)
 				if err != nil {
 					t.Fatal(err)
 				}
 				var result map[string]interface{}
-				if e := json.Unmarshal(resultJSON, &result); e != nil {
+				if e := json.NewDecoder(doc).Decode(&result); e != nil {
 					t.Fatal(e)
 				}
 				if !strings.HasPrefix(test.DocID, "_local/") {
@@ -285,6 +273,7 @@ func TestGet(t *testing.T) {
 		DB       driver.DB
 		Status   int
 		Error    string
+		size     int64
 		Expected interface{}
 	}
 	tests := []getTest{
@@ -304,6 +293,7 @@ func TestGet(t *testing.T) {
 				}
 				return db
 			}(),
+			size:     69,
 			Expected: map[string]string{"_id": "foo", "foo": "bar"},
 		},
 		func() getTest {
@@ -319,6 +309,7 @@ func TestGet(t *testing.T) {
 				Opts: map[string]interface{}{
 					"rev": rev,
 				},
+				size:     69,
 				Expected: map[string]string{"_id": "foo", "foo": "Bar"},
 			}
 		}(),
@@ -339,6 +330,7 @@ func TestGet(t *testing.T) {
 				Opts: map[string]interface{}{
 					"rev": rev,
 				},
+				size:     69,
 				Expected: map[string]string{"_id": "foo", "foo": "Bar"},
 			}
 		}(),
@@ -404,24 +396,13 @@ func TestGet(t *testing.T) {
 				if db == nil {
 					db = setupDB(t, nil)
 				}
-				var msg string
-				var status int
-				docJSON, err := db.Get(context.Background(), test.ID, test.Opts)
-				if err != nil {
-					msg = err.Error()
-					status = kivik.StatusCode(err)
-				}
-				if msg != test.Error {
-					t.Errorf("Unexpected error: %s", msg)
-				}
-				if status != test.Status {
-					t.Errorf("Unexpected status: %d", status)
-				}
-				if err != nil {
-					return
+				size, doc, err := db.Get(context.Background(), test.ID, test.Opts)
+				testy.StatusError(t, test.Error, test.Status, err)
+				if size != test.size {
+					t.Errorf("Unexpected size: %v", size)
 				}
 				var result map[string]interface{}
-				if err := json.Unmarshal(docJSON, &result); err != nil {
+				if err := json.NewDecoder(doc).Decode(&result); err != nil {
 					t.Fatal(err)
 				}
 				if result != nil {
@@ -541,12 +522,12 @@ func TestDeleteDoc(t *testing.T) {
 				if err != nil {
 					return
 				}
-				docJSON, err := db.Get(context.Background(), test.ID, map[string]interface{}{"rev": rev})
+				_, body, err := db.Get(context.Background(), test.ID, map[string]interface{}{"rev": rev})
 				if err != nil {
 					t.Fatal(err)
 				}
 				var doc interface{}
-				if e := json.Unmarshal(docJSON, &doc); e != nil {
+				if e := json.NewDecoder(body).Decode(&doc); e != nil {
 					t.Fatal(e)
 				}
 				expected := map[string]interface{}{
@@ -622,12 +603,12 @@ func TestCreateDoc(t *testing.T) {
 				if err != nil {
 					return
 				}
-				row, err := db.Get(context.Background(), docID, nil)
+				_, row, err := db.Get(context.Background(), docID, nil)
 				if err != nil {
 					t.Fatal(err)
 				}
 				var result map[string]interface{}
-				if e := json.Unmarshal(row, &result); e != nil {
+				if e := json.NewDecoder(row).Decode(&result); e != nil {
 					t.Fatal(e)
 				}
 				if result["_id"].(string) != docID {

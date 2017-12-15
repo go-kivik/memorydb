@@ -1,10 +1,11 @@
 package memorydb
 
 import (
+	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"regexp"
 	"strings"
 
@@ -27,24 +28,24 @@ func (d *db) Query(ctx context.Context, ddoc, view string, opts map[string]inter
 	return nil, notYetImplemented
 }
 
-func (d *db) Get(ctx context.Context, docID string, opts map[string]interface{}) (json.RawMessage, error) {
+func (d *db) Get(ctx context.Context, docID string, opts map[string]interface{}) (int64, io.ReadCloser, error) {
 	if exists, _ := d.client.DBExists(ctx, d.dbName, nil); !exists {
-		return nil, errors.Status(kivik.StatusPreconditionFailed, "database does not exist")
+		return 0, nil, errors.Status(kivik.StatusPreconditionFailed, "database does not exist")
 	}
 	if !d.db.docExists(docID) {
-		return nil, errors.Status(kivik.StatusNotFound, "missing")
+		return 0, nil, errors.Status(kivik.StatusNotFound, "missing")
 	}
 	if rev, ok := opts["rev"].(string); ok {
 		if doc, found := d.db.getRevision(docID, rev); found {
-			return doc.data, nil
+			return int64(len(doc.data)), ioutil.NopCloser(bytes.NewReader(doc.data)), nil
 		}
-		return nil, errors.Status(kivik.StatusNotFound, "missing")
+		return 0, nil, errors.Status(kivik.StatusNotFound, "missing")
 	}
 	last, _ := d.db.latestRevision(docID)
 	if last.Deleted {
-		return nil, errors.Status(kivik.StatusNotFound, "missing")
+		return 0, nil, errors.Status(kivik.StatusNotFound, "missing")
 	}
-	return last.data, nil
+	return int64(len(last.data)), ioutil.NopCloser(bytes.NewReader(last.data)), nil
 }
 
 func (d *db) CreateDoc(ctx context.Context, doc interface{}) (docID, rev string, err error) {
