@@ -46,6 +46,8 @@ func (i *indexSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+var _ driver.Finder = &db{}
+
 func (d *db) CreateIndex(_ context.Context, ddoc, name string, index interface{}) error {
 	return errFindNotImplemented
 }
@@ -100,6 +102,10 @@ func (d *db) Find(_ context.Context, query interface{}) (driver.Rows, error) {
 	rows.offset = 0
 	rows.totalRows = int64(len(rows.docIDs))
 	return rows, nil
+}
+
+func (d *db) Explain(_ context.Context, query interface{}) (*driver.QueryPlan, error) {
+	return nil, errFindNotImplemented
 }
 
 type findResults struct {

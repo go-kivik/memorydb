@@ -41,7 +41,7 @@ func RegisterMemoryDBSuite() {
 
 		"Get/RW/group/Admin/bogus.status": kivik.StatusNotFound,
 
-		"Rev/RW/group/Admin/bogus.status": kivik.StatusNotFound,
+		"GetMeta/RW/group/Admin/bogus.status": kivik.StatusNotFound,
 
 		"Put/RW/Admin/group/LeadingUnderscoreInID.status": kivik.StatusBadRequest,
 		"Put/RW/Admin/group/Conflict.status":              kivik.StatusConflict,
