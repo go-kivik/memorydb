@@ -127,7 +127,7 @@ func TestFind(t *testing.T) {
 			db: func() *db {
 				db := setupDB(t, nil)
 				for _, id := range []string{"a", "c", "z", "q", "chicken"} {
-					if _, err := db.Put(context.Background(), id, map[string]string{"value": id}); err != nil {
+					if _, err := db.Put(context.Background(), id, map[string]string{"value": id}, nil); err != nil {
 						t.Fatal(err)
 					}
 				}
@@ -141,7 +141,7 @@ func TestFind(t *testing.T) {
 			db: func() *db {
 				db := setupDB(t, nil)
 				for _, id := range []string{"a", "c", "z", "q", "chicken"} {
-					if _, err := db.Put(context.Background(), id, map[string]string{"value": id}); err != nil {
+					if _, err := db.Put(context.Background(), id, map[string]string{"value": id}, nil); err != nil {
 						t.Fatal(err)
 					}
 				}
@@ -188,7 +188,7 @@ func TestFindDoc(t *testing.T) {
 			db: func() *db {
 				db := setupDB(t, nil)
 				id := "chicken"
-				if _, err := db.Put(context.Background(), id, map[string]string{"value": id}); err != nil {
+				if _, err := db.Put(context.Background(), id, map[string]string{"value": id}, nil); err != nil {
 					t.Fatal(err)
 				}
 				return db
@@ -204,7 +204,7 @@ func TestFindDoc(t *testing.T) {
 			query: `{"selector":{}, "fields":["value","_rev"]}`,
 			db: func() *db {
 				db := setupDB(t, nil)
-				if _, _, err := db.CreateDoc(context.Background(), map[string]string{"value": "foo"}); err != nil {
+				if _, _, err := db.CreateDoc(context.Background(), map[string]string{"value": "foo"}, nil); err != nil {
 					t.Fatal(err)
 				}
 				return db

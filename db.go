@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"regexp"
 	"strings"
@@ -28,27 +27,35 @@ func (d *db) Query(ctx context.Context, ddoc, view string, opts map[string]inter
 	return nil, notYetImplemented
 }
 
-func (d *db) Get(ctx context.Context, docID string, opts map[string]interface{}) (int64, io.ReadCloser, error) {
+func (d *db) Get(ctx context.Context, docID string, opts map[string]interface{}) (*driver.Document, error) {
 	if exists, _ := d.client.DBExists(ctx, d.dbName, nil); !exists {
-		return 0, nil, errors.Status(kivik.StatusPreconditionFailed, "database does not exist")
+		return nil, errors.Status(kivik.StatusPreconditionFailed, "database does not exist")
 	}
 	if !d.db.docExists(docID) {
-		return 0, nil, errors.Status(kivik.StatusNotFound, "missing")
+		return nil, errors.Status(kivik.StatusNotFound, "missing")
 	}
 	if rev, ok := opts["rev"].(string); ok {
 		if doc, found := d.db.getRevision(docID, rev); found {
-			return int64(len(doc.data)), ioutil.NopCloser(bytes.NewReader(doc.data)), nil
+			return &driver.Document{
+				ContentLength: int64(len(doc.data)),
+				Rev:           rev,
+				Body:          ioutil.NopCloser(bytes.NewReader(doc.data)),
+			}, nil
 		}
-		return 0, nil, errors.Status(kivik.StatusNotFound, "missing")
+		return nil, errors.Status(kivik.StatusNotFound, "missing")
 	}
 	last, _ := d.db.latestRevision(docID)
 	if last.Deleted {
-		return 0, nil, errors.Status(kivik.StatusNotFound, "missing")
+		return nil, errors.Status(kivik.StatusNotFound, "missing")
 	}
-	return int64(len(last.data)), ioutil.NopCloser(bytes.NewReader(last.data)), nil
+	return &driver.Document{
+		ContentLength: int64(len(last.data)),
+		Rev:           fmt.Sprintf("%d-%s", last.ID, last.Rev),
+		Body:          ioutil.NopCloser(bytes.NewReader(last.data)),
+	}, nil
 }
 
-func (d *db) CreateDoc(ctx context.Context, doc interface{}) (docID, rev string, err error) {
+func (d *db) CreateDoc(ctx context.Context, doc interface{}, _ map[string]interface{}) (docID, rev string, err error) {
 	if exists, _ := d.client.DBExists(ctx, d.dbName, nil); !exists {
 		return "", "", errors.Status(kivik.StatusPreconditionFailed, "database does not exist")
 	}
@@ -61,11 +68,11 @@ func (d *db) CreateDoc(ctx context.Context, doc interface{}) (docID, rev string,
 	} else {
 		docID = randStr()
 	}
-	rev, err = d.Put(ctx, docID, doc)
+	rev, err = d.Put(ctx, docID, doc, nil)
 	return docID, rev, err
 }
 
-func (d *db) Put(ctx context.Context, docID string, doc interface{}) (rev string, err error) {
+func (d *db) Put(ctx context.Context, docID string, doc interface{}, _ map[string]interface{}) (rev string, err error) {
 	if exists, _ := d.client.DBExists(ctx, d.dbName, nil); !exists {
 		return "", errors.Status(kivik.StatusPreconditionFailed, "database does not exist")
 	}
@@ -101,7 +108,7 @@ func validRev(rev string) bool {
 	return revRE.MatchString(rev)
 }
 
-func (d *db) Delete(ctx context.Context, docID, rev string) (newRev string, err error) {
+func (d *db) Delete(ctx context.Context, docID, rev string, _ map[string]interface{}) (newRev string, err error) {
 	if exists, _ := d.client.DBExists(ctx, d.dbName, nil); !exists {
 		return "", errors.Status(kivik.StatusPreconditionFailed, "database does not exist")
 	}
@@ -115,7 +122,7 @@ func (d *db) Delete(ctx context.Context, docID, rev string) (newRev string, err 
 		"_id":      docID,
 		"_rev":     rev,
 		"_deleted": true,
-	})
+	}, nil)
 }
 
 func (d *db) Stats(_ context.Context) (*driver.DBStats, error) {
@@ -150,17 +157,17 @@ func (d *db) Changes(ctx context.Context, opts map[string]interface{}) (driver.C
 	return nil, notYetImplemented
 }
 
-func (d *db) PutAttachment(_ context.Context, _, _, _, _ string, _ io.Reader) (string, error) {
+func (d *db) PutAttachment(_ context.Context, _, _ string, _ *driver.Attachment, _ map[string]interface{}) (string, error) {
 	// FIXME: Unimplemented
 	return "", notYetImplemented
 }
 
-func (d *db) GetAttachment(ctx context.Context, docID, rev, filename string) (contentType string, md5sum driver.MD5sum, body io.ReadCloser, err error) {
+func (d *db) GetAttachment(ctx context.Context, docID, rev, filename string, opts map[string]interface{}) (*driver.Attachment, error) {
 	// FIXME: Unimplemented
-	return "", driver.MD5sum{}, nil, notYetImplemented
+	return nil, notYetImplemented
 }
 
-func (d *db) DeleteAttachment(ctx context.Context, docID, rev, filename string) (newRev string, err error) {
+func (d *db) DeleteAttachment(ctx context.Context, docID, rev, filename string, opts map[string]interface{}) (newRev string, err error) {
 	// FIXME: Unimplemented
 	return "", notYetImplemented
 }
