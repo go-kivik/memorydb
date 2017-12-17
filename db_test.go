@@ -111,7 +111,7 @@ func TestPut(t *testing.T) {
 			Doc:   map[string]string{"_id": "foo", "_rev": "bar"},
 			Setup: func() driver.DB {
 				db := setupDB(t, nil)
-				db.Put(context.Background(), "foo", map[string]string{"_id": "foo"})
+				db.Put(context.Background(), "foo", map[string]string{"_id": "foo"}, nil)
 				return db
 			},
 			Status: 409,
@@ -137,7 +137,7 @@ func TestPut(t *testing.T) {
 		},
 		func() putTest {
 			db := setupDB(t, nil)
-			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "bar"})
+			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "bar"}, nil)
 			if err != nil {
 				panic(err)
 			}
@@ -168,11 +168,11 @@ func TestPut(t *testing.T) {
 			Expected: map[string]string{"_id": "foo", "foo": "bar", "_rev": "3-xxx"},
 			Setup: func() driver.DB {
 				db := setupDB(t, nil)
-				rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo"})
+				rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo"}, nil)
 				if err != nil {
 					t.Fatal(err)
 				}
-				if _, e := db.Delete(context.Background(), "foo", rev); e != nil {
+				if _, e := db.Delete(context.Background(), "foo", rev, nil); e != nil {
 					t.Fatal(e)
 				}
 				return db
@@ -185,7 +185,7 @@ func TestPut(t *testing.T) {
 			Expected: map[string]string{"_id": "_local/foo", "foo": "baz", "_rev": "1-0"},
 			Setup: func() driver.DB {
 				db := setupDB(t, nil)
-				_, err := db.Put(context.Background(), "_local/foo", map[string]string{"foo": "bar"})
+				_, err := db.Put(context.Background(), "_local/foo", map[string]string{"foo": "bar"}, nil)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -241,14 +241,14 @@ func TestPut(t *testing.T) {
 				} else {
 					db = setupDB(t, nil)
 				}
-				_, err := db.Put(context.Background(), test.DocID, test.Doc)
+				_, err := db.Put(context.Background(), test.DocID, test.Doc, nil)
 				testy.StatusError(t, test.Error, test.Status, err)
-				_, doc, err := db.Get(context.Background(), test.DocID, nil)
+				doc, err := db.Get(context.Background(), test.DocID, nil)
 				if err != nil {
 					t.Fatal(err)
 				}
 				var result map[string]interface{}
-				if e := json.NewDecoder(doc).Decode(&result); e != nil {
+				if e := json.NewDecoder(doc.Body).Decode(&result); e != nil {
 					t.Fatal(e)
 				}
 				if !strings.HasPrefix(test.DocID, "_local/") {
@@ -273,7 +273,7 @@ func TestGet(t *testing.T) {
 		DB       driver.DB
 		Status   int
 		Error    string
-		size     int64
+		doc      *driver.Document
 		Expected interface{}
 	}
 	tests := []getTest{
@@ -283,22 +283,26 @@ func TestGet(t *testing.T) {
 			Status: 404,
 			Error:  "missing",
 		},
-		{
-			Name: "ExistingDoc",
-			ID:   "foo",
-			DB: func() driver.DB {
-				db := setupDB(t, nil)
-				if _, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "bar"}); err != nil {
-					panic(err)
-				}
-				return db
-			}(),
-			size:     69,
-			Expected: map[string]string{"_id": "foo", "foo": "bar"},
-		},
 		func() getTest {
 			db := setupDB(t, nil)
-			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "Bar"})
+			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "bar"}, nil)
+			if err != nil {
+				panic(err)
+			}
+			return getTest{
+				Name: "ExistingDoc",
+				ID:   "foo",
+				DB:   db,
+				doc: &driver.Document{
+					ContentLength: 69,
+					Rev:           rev,
+				},
+				Expected: map[string]string{"_id": "foo", "foo": "bar"},
+			}
+		}(),
+		func() getTest {
+			db := setupDB(t, nil)
+			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "Bar"}, nil)
 			if err != nil {
 				panic(err)
 			}
@@ -309,17 +313,20 @@ func TestGet(t *testing.T) {
 				Opts: map[string]interface{}{
 					"rev": rev,
 				},
-				size:     69,
+				doc: &driver.Document{
+					ContentLength: 69,
+					Rev:           rev,
+				},
 				Expected: map[string]string{"_id": "foo", "foo": "Bar"},
 			}
 		}(),
 		func() getTest {
 			db := setupDB(t, nil)
-			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "Bar"})
+			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "Bar"}, nil)
 			if err != nil {
 				panic(err)
 			}
-			_, err = db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "baz", "_rev": rev})
+			_, err = db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "baz", "_rev": rev}, nil)
 			if err != nil {
 				panic(err)
 			}
@@ -330,7 +337,10 @@ func TestGet(t *testing.T) {
 				Opts: map[string]interface{}{
 					"rev": rev,
 				},
-				size:     69,
+				doc: &driver.Document{
+					ContentLength: 69,
+					Rev:           rev,
+				},
 				Expected: map[string]string{"_id": "foo", "foo": "Bar"},
 			}
 		}(),
@@ -342,7 +352,7 @@ func TestGet(t *testing.T) {
 			},
 			DB: func() driver.DB {
 				db := setupDB(t, nil)
-				_, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "Bar"})
+				_, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "Bar"}, nil)
 				if err != nil {
 					panic(err)
 				}
@@ -353,11 +363,11 @@ func TestGet(t *testing.T) {
 		},
 		func() getTest {
 			db := setupDB(t, nil)
-			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo"})
+			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo"}, nil)
 			if err != nil {
 				panic(err)
 			}
-			if _, e := db.Delete(context.Background(), "foo", rev); e != nil {
+			if _, e := db.Delete(context.Background(), "foo", rev, nil); e != nil {
 				panic(e)
 			}
 			return getTest{
@@ -396,14 +406,15 @@ func TestGet(t *testing.T) {
 				if db == nil {
 					db = setupDB(t, nil)
 				}
-				size, doc, err := db.Get(context.Background(), test.ID, test.Opts)
+				doc, err := db.Get(context.Background(), test.ID, test.Opts)
 				testy.StatusError(t, test.Error, test.Status, err)
-				if size != test.size {
-					t.Errorf("Unexpected size: %v", size)
-				}
 				var result map[string]interface{}
-				if err := json.NewDecoder(doc).Decode(&result); err != nil {
+				if err := json.NewDecoder(doc.Body).Decode(&result); err != nil {
 					t.Fatal(err)
+				}
+				doc.Body = nil // Determinism
+				if d := diff.Interface(test.doc, doc); d != nil {
+					t.Errorf("Unexpected doc:\n%s", d)
 				}
 				if result != nil {
 					delete(result, "_rev")
@@ -435,7 +446,7 @@ func TestDeleteDoc(t *testing.T) {
 		},
 		func() delTest {
 			db := setupDB(t, nil)
-			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo"})
+			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo"}, nil)
 			if err != nil {
 				panic(err)
 			}
@@ -459,7 +470,7 @@ func TestDeleteDoc(t *testing.T) {
 			Rev:  "",
 			DB: func() driver.DB {
 				db := setupDB(t, nil)
-				if _, err := db.Put(context.Background(), "_local/foo", map[string]string{"foo": "bar"}); err != nil {
+				if _, err := db.Put(context.Background(), "_local/foo", map[string]string{"foo": "bar"}, nil); err != nil {
 					panic(err)
 				}
 				return db
@@ -471,7 +482,7 @@ func TestDeleteDoc(t *testing.T) {
 			Rev:  "0-1",
 			DB: func() driver.DB {
 				db := setupDB(t, nil)
-				if _, err := db.Put(context.Background(), "_local/foo", map[string]string{"foo": "bar"}); err != nil {
+				if _, err := db.Put(context.Background(), "_local/foo", map[string]string{"foo": "bar"}, nil); err != nil {
 					panic(err)
 				}
 				return db
@@ -506,7 +517,7 @@ func TestDeleteDoc(t *testing.T) {
 				if db == nil {
 					db = setupDB(t, nil)
 				}
-				rev, err := db.Delete(context.Background(), test.ID, test.Rev)
+				rev, err := db.Delete(context.Background(), test.ID, test.Rev, nil)
 				var msg string
 				var status int
 				if err != nil {
@@ -522,12 +533,12 @@ func TestDeleteDoc(t *testing.T) {
 				if err != nil {
 					return
 				}
-				_, body, err := db.Get(context.Background(), test.ID, map[string]interface{}{"rev": rev})
+				row, err := db.Get(context.Background(), test.ID, map[string]interface{}{"rev": rev})
 				if err != nil {
 					t.Fatal(err)
 				}
 				var doc interface{}
-				if e := json.NewDecoder(body).Decode(&doc); e != nil {
+				if e := json.NewDecoder(row.Body).Decode(&doc); e != nil {
 					t.Fatal(e)
 				}
 				expected := map[string]interface{}{
@@ -592,7 +603,7 @@ func TestCreateDoc(t *testing.T) {
 				if db == nil {
 					db = setupDB(t, nil)
 				}
-				docID, _, err := db.CreateDoc(context.Background(), test.Doc)
+				docID, _, err := db.CreateDoc(context.Background(), test.Doc, nil)
 				var msg string
 				if err != nil {
 					msg = err.Error()
@@ -603,12 +614,12 @@ func TestCreateDoc(t *testing.T) {
 				if err != nil {
 					return
 				}
-				_, row, err := db.Get(context.Background(), docID, nil)
+				row, err := db.Get(context.Background(), docID, nil)
 				if err != nil {
 					t.Fatal(err)
 				}
 				var result map[string]interface{}
-				if e := json.NewDecoder(row).Decode(&result); e != nil {
+				if e := json.NewDecoder(row.Body).Decode(&result); e != nil {
 					t.Fatal(e)
 				}
 				if result["_id"].(string) != docID {
