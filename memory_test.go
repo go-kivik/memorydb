@@ -13,7 +13,7 @@ import (
 var d = &memDriver{}
 
 func setup(t *testing.T, setup func(driver.Client)) driver.Client {
-	c, err := d.NewClient(context.Background(), "foo")
+	c, err := d.NewClient("foo")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func setup(t *testing.T, setup func(driver.Client)) driver.Client {
 }
 
 func TestNewClient(t *testing.T) {
-	_, err := d.NewClient(context.Background(), "foo")
+	_, err := d.NewClient("foo")
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
