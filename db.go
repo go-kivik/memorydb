@@ -162,7 +162,7 @@ func (d *db) PutAttachment(_ context.Context, _, _ string, _ *driver.Attachment,
 	return "", notYetImplemented
 }
 
-func (d *db) GetAttachment(ctx context.Context, docID, rev, filename string, opts map[string]interface{}) (*driver.Attachment, error) {
+func (d *db) GetAttachment(ctx context.Context, docID, filename string, opts map[string]interface{}) (*driver.Attachment, error) {
 	// FIXME: Unimplemented
 	return nil, notYetImplemented
 }
