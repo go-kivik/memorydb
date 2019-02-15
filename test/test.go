@@ -97,7 +97,7 @@ func MemoryTest(t *testing.T) {
 		RW:    true,
 		Admin: client,
 	}
-	if _, err := client.CreateDB(context.Background(), "_users"); err != nil {
+	if err := client.CreateDB(context.Background(), "_users").Err(); err != nil {
 		t.Fatal(err)
 	}
 	kiviktest.RunTestsInternal(clients, kiviktest.SuiteKivikMemory, t)
