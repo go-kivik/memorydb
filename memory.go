@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"regexp"
 	"sync"
 
@@ -70,11 +71,11 @@ var validNames = map[string]struct{}{
 
 func (c *client) CreateDB(ctx context.Context, dbName string, options map[string]interface{}) error {
 	if exists, _ := c.DBExists(ctx, dbName, options); exists {
-		return errors.Status(kivik.StatusPreconditionFailed, "database exists")
+		return errors.Status(http.StatusPreconditionFailed, "database exists")
 	}
 	if _, ok := validNames[dbName]; !ok {
 		if !validDBName.MatchString(dbName) {
-			return errors.Status(kivik.StatusBadRequest, "invalid database name")
+			return errors.Status(http.StatusBadRequest, "invalid database name")
 		}
 	}
 	c.mutex.Lock()
@@ -88,7 +89,7 @@ func (c *client) CreateDB(ctx context.Context, dbName string, options map[string
 
 func (c *client) DestroyDB(ctx context.Context, dbName string, options map[string]interface{}) error {
 	if exists, _ := c.DBExists(ctx, dbName, options); !exists {
-		return errors.Status(kivik.StatusNotFound, "database does not exist")
+		return errors.Status(http.StatusNotFound, "database does not exist")
 	}
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -101,7 +102,7 @@ func (c *client) DestroyDB(ctx context.Context, dbName string, options map[strin
 
 func (c *client) DB(ctx context.Context, dbName string, options map[string]interface{}) (driver.DB, error) {
 	if exists, _ := c.DBExists(ctx, dbName, options); !exists {
-		return nil, errors.Status(kivik.StatusNotFound, "database does not exist")
+		return nil, errors.Status(http.StatusNotFound, "database does not exist")
 	}
 	return &db{
 		client: c,

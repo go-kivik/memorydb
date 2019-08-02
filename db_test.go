@@ -3,6 +3,7 @@ package memorydb
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -225,7 +226,7 @@ func TestPut(t *testing.T) {
 				}
 				return db
 			},
-			Status: kivik.StatusPreconditionFailed,
+			Status: http.StatusPreconditionFailed,
 			Error:  "database does not exist",
 		},
 	}
@@ -393,7 +394,7 @@ func TestGet(t *testing.T) {
 				return db
 			}(),
 			Error:  "database does not exist",
-			Status: kivik.StatusPreconditionFailed,
+			Status: http.StatusPreconditionFailed,
 		},
 	}
 	for _, test := range tests {
@@ -503,7 +504,7 @@ func TestDeleteDoc(t *testing.T) {
 				}
 				return db
 			}(),
-			Status: kivik.StatusPreconditionFailed,
+			Status: http.StatusPreconditionFailed,
 			Error:  "database does not exist",
 		},
 	}
