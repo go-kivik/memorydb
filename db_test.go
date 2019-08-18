@@ -59,7 +59,7 @@ func TestStats(t *testing.T) {
 	}
 }
 
-func setupDB(t *testing.T, s func(driver.DB)) *db {
+func setupDB(t *testing.T) *db {
 	c := setup(t, nil)
 	if err := c.CreateDB(context.Background(), "foo", nil); err != nil {
 		t.Fatal(err)
@@ -67,9 +67,6 @@ func setupDB(t *testing.T, s func(driver.DB)) *db {
 	d, err := c.DB(context.Background(), "foo", nil)
 	if err != nil {
 		t.Fatal(err)
-	}
-	if s != nil {
-		s(d)
 	}
 	return d.(*db)
 }
@@ -109,7 +106,7 @@ func TestPut(t *testing.T) {
 			DocID: "foo",
 			Doc:   map[string]string{"_id": "foo", "_rev": "bar"},
 			Setup: func() driver.DB {
-				db := setupDB(t, nil)
+				db := setupDB(t)
 				db.Put(context.Background(), "foo", map[string]string{"_id": "foo"}, nil)
 				return db
 			},
@@ -135,7 +132,7 @@ func TestPut(t *testing.T) {
 			Error:  "document update conflict",
 		},
 		func() putTest {
-			db := setupDB(t, nil)
+			db := setupDB(t)
 			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "bar"}, nil)
 			if err != nil {
 				panic(err)
@@ -166,7 +163,7 @@ func TestPut(t *testing.T) {
 			Doc:      map[string]string{"foo": "bar"},
 			Expected: map[string]string{"_id": "foo", "foo": "bar", "_rev": "3-xxx"},
 			Setup: func() driver.DB {
-				db := setupDB(t, nil)
+				db := setupDB(t)
 				rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo"}, nil)
 				if err != nil {
 					t.Fatal(err)
@@ -183,7 +180,7 @@ func TestPut(t *testing.T) {
 			Doc:      map[string]string{"foo": "baz"},
 			Expected: map[string]string{"_id": "_local/foo", "foo": "baz", "_rev": "1-0"},
 			Setup: func() driver.DB {
-				db := setupDB(t, nil)
+				db := setupDB(t)
 				_, err := db.Put(context.Background(), "_local/foo", map[string]string{"foo": "bar"}, nil)
 				if err != nil {
 					t.Fatal(err)
@@ -238,7 +235,7 @@ func TestPut(t *testing.T) {
 				if test.Setup != nil {
 					db = test.Setup()
 				} else {
-					db = setupDB(t, nil)
+					db = setupDB(t)
 				}
 				_, err := db.Put(context.Background(), test.DocID, test.Doc, nil)
 				testy.StatusError(t, test.Error, test.Status, err)
@@ -283,7 +280,7 @@ func TestGet(t *testing.T) {
 			Error:  "missing",
 		},
 		func() getTest {
-			db := setupDB(t, nil)
+			db := setupDB(t)
 			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "bar"}, nil)
 			if err != nil {
 				panic(err)
@@ -300,7 +297,7 @@ func TestGet(t *testing.T) {
 			}
 		}(),
 		func() getTest {
-			db := setupDB(t, nil)
+			db := setupDB(t)
 			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "Bar"}, nil)
 			if err != nil {
 				panic(err)
@@ -320,7 +317,7 @@ func TestGet(t *testing.T) {
 			}
 		}(),
 		func() getTest {
-			db := setupDB(t, nil)
+			db := setupDB(t)
 			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "Bar"}, nil)
 			if err != nil {
 				panic(err)
@@ -350,7 +347,7 @@ func TestGet(t *testing.T) {
 				"rev": "1-4c6114c65e295552ab1019e2b046b10e",
 			},
 			DB: func() driver.DB {
-				db := setupDB(t, nil)
+				db := setupDB(t)
 				_, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "Bar"}, nil)
 				if err != nil {
 					panic(err)
@@ -361,7 +358,7 @@ func TestGet(t *testing.T) {
 			Error:  "missing",
 		},
 		func() getTest {
-			db := setupDB(t, nil)
+			db := setupDB(t)
 			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo"}, nil)
 			if err != nil {
 				panic(err)
@@ -403,7 +400,7 @@ func TestGet(t *testing.T) {
 				t.Parallel()
 				db := test.DB
 				if db == nil {
-					db = setupDB(t, nil)
+					db = setupDB(t)
 				}
 				doc, err := db.Get(context.Background(), test.ID, test.Opts)
 				testy.StatusError(t, test.Error, test.Status, err)
@@ -444,7 +441,7 @@ func TestDeleteDoc(t *testing.T) {
 			Error:  "missing",
 		},
 		func() delTest {
-			db := setupDB(t, nil)
+			db := setupDB(t)
 			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo"}, nil)
 			if err != nil {
 				panic(err)
@@ -468,7 +465,7 @@ func TestDeleteDoc(t *testing.T) {
 			ID:   "_local/foo",
 			Rev:  "",
 			DB: func() driver.DB {
-				db := setupDB(t, nil)
+				db := setupDB(t)
 				if _, err := db.Put(context.Background(), "_local/foo", map[string]string{"foo": "bar"}, nil); err != nil {
 					panic(err)
 				}
@@ -480,7 +477,7 @@ func TestDeleteDoc(t *testing.T) {
 			ID:   "_local/foo",
 			Rev:  "0-1",
 			DB: func() driver.DB {
-				db := setupDB(t, nil)
+				db := setupDB(t)
 				if _, err := db.Put(context.Background(), "_local/foo", map[string]string{"foo": "bar"}, nil); err != nil {
 					panic(err)
 				}
@@ -514,7 +511,7 @@ func TestDeleteDoc(t *testing.T) {
 				t.Parallel()
 				db := test.DB
 				if db == nil {
-					db = setupDB(t, nil)
+					db = setupDB(t)
 				}
 				rev, err := db.Delete(context.Background(), test.ID, test.Rev, nil)
 				var msg string
@@ -600,7 +597,7 @@ func TestCreateDoc(t *testing.T) {
 			t.Run(test.Name, func(t *testing.T) {
 				db := test.DB
 				if db == nil {
-					db = setupDB(t, nil)
+					db = setupDB(t)
 				}
 				docID, _, err := db.CreateDoc(context.Background(), test.Doc, nil)
 				var msg string
