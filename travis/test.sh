@@ -8,8 +8,8 @@ function join_list {
 
 go test -race $(go list ./... | grep -v /vendor/)
 
-# Only run GopherJS tests,  Linter and coveragetests on Linux/Go 1.11
-if [[ ${TRAVIS_OS_NAME} == "linux" && "${TRAVIS_GO_VERSION}" == "1.11.x" ]]; then
+# Only run GopherJS tests,  Linter and coveragetests on Linux/Go 1.12
+if [[ ${TRAVIS_OS_NAME} == "linux" && "${TRAVIS_GO_VERSION}" == "1.12.x" ]]; then
     gopherjs test $(go list ./... | grep -v /vendor/)
 
     # Linter

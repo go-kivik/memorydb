@@ -4,8 +4,8 @@ set -o xtrace
 
 glide update
 
-# Only run GopherJS tests and Linter tests on Linux/Go 1.11
-if [[ "${TRAVIS_GO_VERSION}" == "1.11.x" ]]; then
+# Only run GopherJS tests and Linter tests on Linux/Go 1.12
+if [[ "${TRAVIS_GO_VERSION}" == "1.12.x" ]]; then
     # Install nodejs and dependencies, but only for Linux
     curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
     sudo apt-get update -qq
