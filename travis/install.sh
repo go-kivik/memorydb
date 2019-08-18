@@ -2,7 +2,8 @@
 set -euC
 set -o xtrace
 
-glide update
+curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+dep ensure && dep status
 
 # Only run GopherJS tests and Linter tests on Linux/Go 1.12
 if [[ "${TRAVIS_GO_VERSION}" == "1.12.x" ]]; then
@@ -11,8 +12,6 @@ if [[ "${TRAVIS_GO_VERSION}" == "1.12.x" ]]; then
     sudo apt-get update -qq
     sudo apt-get install -y nodejs
     npm install
-    # Install Go deps only needed by PouchDB driver/GopherJS
-    [ -e glide.gopherjs.yaml ] && glide -y glide.gopherjs.yaml install
     # Then install GopherJS and related dependencies
     go get -u github.com/gopherjs/gopherjs
 
