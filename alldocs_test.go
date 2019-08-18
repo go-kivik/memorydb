@@ -45,7 +45,7 @@ func TestAllDocs(t *testing.T) {
 		{
 			Name: "OneDoc",
 			DB: func() *db {
-				db := setupDB(t, nil)
+				db := setupDB(t)
 				if _, err := db.Put(context.Background(), "foo", map[string]string{"foo": "bar"}, nil); err != nil {
 					t.Fatal(err)
 				}
@@ -56,7 +56,7 @@ func TestAllDocs(t *testing.T) {
 		{
 			Name: "Five Docs",
 			DB: func() *db {
-				db := setupDB(t, nil)
+				db := setupDB(t)
 				for _, id := range []string{"a", "c", "z", "q", "chicken"} {
 					if _, err := db.Put(context.Background(), id, map[string]string{"value": id}, nil); err != nil {
 						t.Fatal(err)
@@ -72,7 +72,7 @@ func TestAllDocs(t *testing.T) {
 			t.Run(test.Name, func(t *testing.T) {
 				db := test.DB
 				if db == nil {
-					db = setupDB(t, nil)
+					db = setupDB(t)
 				}
 				rows, err := db.AllDocs(context.Background(), nil)
 				var msg string

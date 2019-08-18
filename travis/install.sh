@@ -32,5 +32,5 @@ if [[ "${TRAVIS_GO_VERSION}" == "1.12.x" ]]; then
     go get -u -d -tags=js github.com/gopherjs/jsbuiltin
 
     # Linter
-    go get -u gopkg.in/alecthomas/gometalinter.v1 && gometalinter.v1 --install
+    curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.17.1
 fi

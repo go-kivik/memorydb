@@ -76,7 +76,7 @@ func TestGetSecurity(t *testing.T) {
 				t.Parallel()
 				db := test.DB
 				if db == nil {
-					db = setupDB(t, nil)
+					db = setupDB(t)
 				}
 				sec, err := db.Security(context.Background())
 				var msg string
@@ -154,7 +154,7 @@ func TestSetSecurity(t *testing.T) {
 				t.Parallel()
 				db := test.DB
 				if db == nil {
-					db = setupDB(t, nil)
+					db = setupDB(t)
 				}
 				err := db.SetSecurity(context.Background(), test.Security)
 				var msg string
