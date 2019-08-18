@@ -6,8 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/flimzy/diff"
-	"github.com/flimzy/testy"
+	"gitlab.com/flimzy/testy"
 
 	"github.com/go-kivik/kivik"
 	"github.com/go-kivik/kivik/driver"
@@ -52,7 +51,7 @@ func TestStats(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if d := diff.Interface(test.Expected, result); d != nil {
+				if d := testy.DiffInterface(test.Expected, result); d != nil {
 					t.Error(d)
 				}
 			})
@@ -257,7 +256,7 @@ func TestPut(t *testing.T) {
 						result["_rev"] = parts[0] + "-xxx"
 					}
 				}
-				if d := diff.AsJSON(test.Expected, result); d != nil {
+				if d := testy.DiffAsJSON(test.Expected, result); d != nil {
 					t.Error(d)
 				}
 			})
@@ -413,13 +412,13 @@ func TestGet(t *testing.T) {
 					t.Fatal(err)
 				}
 				doc.Body = nil // Determinism
-				if d := diff.Interface(test.doc, doc); d != nil {
+				if d := testy.DiffInterface(test.doc, doc); d != nil {
 					t.Errorf("Unexpected doc:\n%s", d)
 				}
 				if result != nil {
 					delete(result, "_rev")
 				}
-				if d := diff.AsJSON(test.Expected, result); d != nil {
+				if d := testy.DiffAsJSON(test.Expected, result); d != nil {
 					t.Error(d)
 				}
 			})
@@ -546,7 +545,7 @@ func TestDeleteDoc(t *testing.T) {
 					"_rev":     rev,
 					"_deleted": true,
 				}
-				if d := diff.AsJSON(expected, doc); d != nil {
+				if d := testy.DiffAsJSON(expected, doc); d != nil {
 					t.Error(d)
 				}
 
@@ -630,7 +629,7 @@ func TestCreateDoc(t *testing.T) {
 					parts := strings.SplitN(rev, "-", 2)
 					result["_rev"] = parts[0] + "-xxx"
 				}
-				if d := diff.Interface(test.Expected, result); d != nil {
+				if d := testy.DiffInterface(test.Expected, result); d != nil {
 					t.Error(d)
 				}
 			})
