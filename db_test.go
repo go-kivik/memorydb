@@ -107,7 +107,9 @@ func TestPut(t *testing.T) {
 			Doc:   map[string]string{"_id": "foo", "_rev": "bar"},
 			Setup: func() driver.DB {
 				db := setupDB(t)
-				db.Put(context.Background(), "foo", map[string]string{"_id": "foo"}, nil)
+				if _, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo"}, nil); err != nil {
+					t.Fatal(err)
+				}
 				return db
 			},
 			Status: 409,
