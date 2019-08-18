@@ -2,6 +2,7 @@ package test
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"github.com/go-kivik/kivik"
@@ -17,8 +18,8 @@ func RegisterMemoryDBSuite() {
 
 		"AllDBs.expected": []string{"_users"},
 
-		"CreateDB/RW/NoAuth.status":         kivik.StatusUnauthorized,
-		"CreateDB/RW/Admin/Recreate.status": kivik.StatusPreconditionFailed,
+		"CreateDB/RW/NoAuth.status":         http.StatusUnauthorized,
+		"CreateDB/RW/Admin/Recreate.status": http.StatusPreconditionFailed,
 
 		"AllDocs.skip": true, // FIXME: Unimplemented
 
@@ -26,9 +27,9 @@ func RegisterMemoryDBSuite() {
 		"DBExists/Admin/chicken.exists":  false,
 		"DBExists/RW/group/Admin.exists": true,
 
-		"DestroyDB/RW/Admin/NonExistantDB.status": kivik.StatusNotFound,
+		"DestroyDB/RW/Admin/NonExistantDB.status": http.StatusNotFound,
 
-		"Log.status":          kivik.StatusNotImplemented,
+		"Log.status":          http.StatusNotImplemented,
 		"Log/Admin/HTTP.skip": true,
 
 		"Version.version":        `^0\.0\.1$`,
@@ -39,50 +40,50 @@ func RegisterMemoryDBSuite() {
 		"GetReplications.skip": true,
 		"Replicate.skip":       true,
 
-		"Get/RW/group/Admin/bogus.status": kivik.StatusNotFound,
+		"Get/RW/group/Admin/bogus.status": http.StatusNotFound,
 
-		"GetMeta/RW/group/Admin/bogus.status": kivik.StatusNotFound,
+		"GetMeta/RW/group/Admin/bogus.status": http.StatusNotFound,
 
-		"Put/RW/Admin/group/LeadingUnderscoreInID.status": kivik.StatusBadRequest,
-		"Put/RW/Admin/group/Conflict.status":              kivik.StatusConflict,
+		"Put/RW/Admin/group/LeadingUnderscoreInID.status": http.StatusBadRequest,
+		"Put/RW/Admin/group/Conflict.status":              http.StatusConflict,
 
-		"Delete/RW/Admin/group/MissingDoc.status":       kivik.StatusNotFound,
-		"Delete/RW/Admin/group/InvalidRevFormat.status": kivik.StatusBadRequest,
-		"Delete/RW/Admin/group/WrongRev.status":         kivik.StatusConflict,
+		"Delete/RW/Admin/group/MissingDoc.status":       http.StatusNotFound,
+		"Delete/RW/Admin/group/InvalidRevFormat.status": http.StatusBadRequest,
+		"Delete/RW/Admin/group/WrongRev.status":         http.StatusConflict,
 
 		"Security.databases":            []string{"_users", "chicken", "_duck"},
-		"Security/Admin/chicken.status": kivik.StatusNotFound,
-		"Security/Admin/_duck.status":   kivik.StatusNotFound,
+		"Security/Admin/chicken.status": http.StatusNotFound,
+		"Security/Admin/_duck.status":   http.StatusNotFound,
 
-		"SetSecurity/RW/Admin/NotExists.status": kivik.StatusNotFound,
+		"SetSecurity/RW/Admin/NotExists.status": http.StatusNotFound,
 
-		"BulkDocs/RW/NoAuth/group/Mix/Conflict.status": kivik.StatusConflict,
-		"BulkDocs/RW/Admin/group/Mix/Conflict.status":  kivik.StatusConflict,
+		"BulkDocs/RW/NoAuth/group/Mix/Conflict.status": http.StatusConflict,
+		"BulkDocs/RW/Admin/group/Mix/Conflict.status":  http.StatusConflict,
 
 		"Find.databases":                       []string{"chicken", "_duck"},
-		"Find/Admin/chicken.status":            kivik.StatusNotFound,
-		"Find/Admin/_duck.status":              kivik.StatusNotFound,
-		"Find/NoAuth/chicken.status":           kivik.StatusNotFound,
-		"Find/NoAuth/_duck.status":             kivik.StatusUnauthorized,
+		"Find/Admin/chicken.status":            http.StatusNotFound,
+		"Find/Admin/_duck.status":              http.StatusNotFound,
+		"Find/NoAuth/chicken.status":           http.StatusNotFound,
+		"Find/NoAuth/_duck.status":             http.StatusUnauthorized,
 		"Find/RW/group/Admin/Warning.warning":  "no matching index found, create an index to optimize query time",
 		"Find/RW/group/NoAuth/Warning.warning": "no matching index found, create an index to optimize query time",
 
-		"Explain.skip":           true,                       // FIXME: Unimplemented
-		"Stats.skip":             true,                       // FIXME: Unimplemented
-		"Compact.skip":           true,                       // FIXME: Unimplemented
-		"DBUpdates.status":       kivik.StatusNotImplemented, // FIXME: Unimplemented
-		"Changes.skip":           true,                       // FIXME: Unimplemented
-		"Copy.skip":              true,                       // FIXME: Unimplemented, depends on Get/Put or Copy
-		"GetAttachment.skip":     true,                       // FIXME: Unimplemented
-		"GetAttachmentMeta.skip": true,                       // FIXME: Unimplemented
-		"PutAttachment.skip":     true,                       // FIXME: Unimplemented
-		"DeleteAttachment.skip":  true,                       // FIXME: Unimplemented
-		"Query.skip":             true,                       // FIXME: Unimplemented
-		"CreateIndex.skip":       true,                       // FIXME: Unimplemented
-		"GetIndexes.skip":        true,                       // FIXME: Unimplemented
-		"DeleteIndex.skip":       true,                       // FIXME: Unimplemented
-		"SetSecurity.skip":       true,                       // FIXME: Unimplemented
-		"ViewCleanup.skip":       true,                       // FIXME: Unimplemented
+		"Explain.skip":           true,                      // FIXME: Unimplemented
+		"Stats.skip":             true,                      // FIXME: Unimplemented
+		"Compact.skip":           true,                      // FIXME: Unimplemented
+		"DBUpdates.status":       http.StatusNotImplemented, // FIXME: Unimplemented
+		"Changes.skip":           true,                      // FIXME: Unimplemented
+		"Copy.skip":              true,                      // FIXME: Unimplemented, depends on Get/Put or Copy
+		"GetAttachment.skip":     true,                      // FIXME: Unimplemented
+		"GetAttachmentMeta.skip": true,                      // FIXME: Unimplemented
+		"PutAttachment.skip":     true,                      // FIXME: Unimplemented
+		"DeleteAttachment.skip":  true,                      // FIXME: Unimplemented
+		"Query.skip":             true,                      // FIXME: Unimplemented
+		"CreateIndex.skip":       true,                      // FIXME: Unimplemented
+		"GetIndexes.skip":        true,                      // FIXME: Unimplemented
+		"DeleteIndex.skip":       true,                      // FIXME: Unimplemented
+		"SetSecurity.skip":       true,                      // FIXME: Unimplemented
+		"ViewCleanup.skip":       true,                      // FIXME: Unimplemented
 	})
 }
 

@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/go-kivik/kivik"
 	"github.com/go-kivik/kivik/driver"
 	"github.com/go-kivik/kivik/errors"
 )
@@ -96,11 +96,11 @@ func toCouchDoc(i interface{}) (couchDoc, error) {
 	}
 	asJSON, err := json.Marshal(i)
 	if err != nil {
-		return nil, errors.WrapStatus(kivik.StatusBadRequest, err)
+		return nil, errors.WrapStatus(http.StatusBadRequest, err)
 	}
 	var m couchDoc
 	if e := json.Unmarshal(asJSON, &m); e != nil {
-		return nil, errors.Status(kivik.StatusInternalServerError, "failed to decode encoded document; this is a bug!")
+		return nil, errors.Status(http.StatusInternalServerError, "failed to decode encoded document; this is a bug!")
 	}
 	return m, nil
 }
