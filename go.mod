@@ -3,7 +3,7 @@ module github.com/go-kivik/memorydb
 go 1.14
 
 require (
-	github.com/flimzy/diff v0.1.6
+	github.com/flimzy/diff v0.1.6 // indirect
 	github.com/flimzy/testy v0.1.17 // indirect
 	github.com/go-kivik/couchdb v2.0.0-pre3.0.20190817132629-5c9d2877c871+incompatible // indirect
 	github.com/go-kivik/kivik v2.0.0-pre2+incompatible

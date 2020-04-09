@@ -7,9 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/flimzy/diff"
-
 	"github.com/go-kivik/kivik/driver"
+	"gitlab.com/flimzy/testy"
 )
 
 func TestIndexSpecUnmarshalJSON(t *testing.T) {
@@ -65,7 +64,7 @@ func TestIndexSpecUnmarshalJSON(t *testing.T) {
 			if err != nil {
 				return
 			}
-			if d := diff.Interface(test.expected, result); d != nil {
+			if d := testy.DiffInterface(test.expected, result); d != nil {
 				t.Error(d)
 			}
 		})
@@ -236,7 +235,7 @@ func TestFindDoc(t *testing.T) {
 			}
 			parts := strings.Split(result["_rev"].(string), "-")
 			result["_rev"] = parts[0] + "-xxx"
-			if d := diff.AsJSON(test.expected, result); d != nil {
+			if d := testy.DiffAsJSON(test.expected, result); d != nil {
 				t.Error(d)
 			}
 		})
@@ -292,7 +291,7 @@ func TestFilterDoc(t *testing.T) {
 			if err != nil {
 				return
 			}
-			if d := diff.JSON([]byte(test.expected), result); d != nil {
+			if d := testy.DiffJSON([]byte(test.expected), result); d != nil {
 				t.Error(d)
 			}
 		})

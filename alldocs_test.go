@@ -6,9 +6,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/flimzy/diff"
-
 	"github.com/go-kivik/kivik/driver"
+	"gitlab.com/flimzy/testy"
 )
 
 func TestAllDocsClose(t *testing.T) {
@@ -109,7 +108,7 @@ func checkRows(t *testing.T, rows driver.Rows, expectedIDs []string, rowsErr str
 		t.Errorf("Unexpected rows error: %s", msg)
 	}
 	sort.Strings(ids)
-	if d := diff.TextSlices(expectedIDs, ids); d != nil {
+	if d := testy.DiffTextSlices(expectedIDs, ids); d != nil {
 		t.Error(d)
 	}
 }
