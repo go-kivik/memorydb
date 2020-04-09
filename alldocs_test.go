@@ -6,7 +6,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/go-kivik/kivik/driver"
+	"github.com/go-kivik/kivik/v4/driver"
 	"gitlab.com/flimzy/testy"
 )
 

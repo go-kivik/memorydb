@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/go-kivik/kivik/driver"
-	"github.com/go-kivik/kivik/errors"
+	"github.com/go-kivik/kivik/v4/driver"
+	"github.com/go-kivik/kivik/v4/errors"
 )
 
 func cloneSecurity(in *driver.Security) *driver.Security {
