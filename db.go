@@ -9,8 +9,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/go-kivik/kivik/driver"
-	"github.com/go-kivik/kivik/errors"
+	"github.com/go-kivik/kivik/v3/driver"
+	"github.com/go-kivik/kivik/v3/errors"
 )
 
 var notYetImplemented = errors.Status(http.StatusNotImplemented, "kivik: not yet implemented in memory driver")
