@@ -5,9 +5,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/flimzy/diff"
-
 	"github.com/go-kivik/kivik/driver"
+	"gitlab.com/flimzy/testy"
 )
 
 var d = &memDriver{}
@@ -172,7 +171,7 @@ func TestAllDBs(t *testing.T) {
 				}
 				sort.Strings(test.Expected)
 				sort.Strings(result)
-				if d := diff.Interface(test.Expected, result); d != nil {
+				if d := testy.DiffInterface(test.Expected, result); d != nil {
 					t.Error(d)
 				}
 			})

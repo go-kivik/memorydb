@@ -4,9 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/flimzy/diff"
-
 	"github.com/go-kivik/kivik/driver"
+	"gitlab.com/flimzy/testy"
 )
 
 func TestGetSecurity(t *testing.T) {
@@ -89,7 +88,7 @@ func TestGetSecurity(t *testing.T) {
 				if err != nil {
 					return
 				}
-				if d := diff.AsJSON(test.Expected, sec); d != nil {
+				if d := testy.DiffAsJSON(test.Expected, sec); d != nil {
 					t.Error(d)
 				}
 			})
@@ -171,7 +170,7 @@ func TestSetSecurity(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				if d := diff.AsJSON(test.Expected, sec); d != nil {
+				if d := testy.DiffAsJSON(test.Expected, sec); d != nil {
 					t.Error(d)
 				}
 			})
