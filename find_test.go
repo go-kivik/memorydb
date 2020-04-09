@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-kivik/kivik/driver"
+	"github.com/go-kivik/kivik/v4/driver"
 	"gitlab.com/flimzy/testy"
 )
 
@@ -73,7 +73,7 @@ func TestIndexSpecUnmarshalJSON(t *testing.T) {
 
 func TestCreateIndex(t *testing.T) {
 	d := &db{}
-	err := d.CreateIndex(context.Background(), "foo", "bar", "baz")
+	err := d.CreateIndex(context.Background(), "foo", "bar", "baz", nil)
 	if err != errFindNotImplemented {
 		t.Errorf("Unexpected error: %s", err)
 	}
@@ -81,7 +81,7 @@ func TestCreateIndex(t *testing.T) {
 
 func TestGetIndexes(t *testing.T) {
 	d := &db{}
-	_, err := d.GetIndexes(context.Background())
+	_, err := d.GetIndexes(context.Background(), nil)
 	if err != errFindNotImplemented {
 		t.Errorf("Unexpected error: %s", err)
 	}
@@ -89,7 +89,7 @@ func TestGetIndexes(t *testing.T) {
 
 func TestDeleteIndex(t *testing.T) {
 	d := &db{}
-	err := d.DeleteIndex(context.Background(), "foo", "bar")
+	err := d.DeleteIndex(context.Background(), "foo", "bar", nil)
 	if err != errFindNotImplemented {
 		t.Errorf("Unexpected error: %s", err)
 	}
@@ -155,7 +155,7 @@ func TestFind(t *testing.T) {
 			if db == nil {
 				db = setupDB(t)
 			}
-			rows, err := db.Find(context.Background(), test.query)
+			rows, err := db.Find(context.Background(), test.query, nil)
 			var msg string
 			if err != nil {
 				msg = err.Error()
@@ -220,7 +220,7 @@ func TestFindDoc(t *testing.T) {
 			if db == nil {
 				db = setupDB(t)
 			}
-			rows, err := db.Find(context.Background(), test.query)
+			rows, err := db.Find(context.Background(), test.query, nil)
 			if err != nil {
 				t.Fatal(err)
 			}

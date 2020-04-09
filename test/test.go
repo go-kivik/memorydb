@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/go-kivik/kivik"
-	"github.com/go-kivik/kiviktest"
-	"github.com/go-kivik/kiviktest/kt"
+	"github.com/go-kivik/kivik/v4"
+	"github.com/go-kivik/kiviktest/v4"
+	"github.com/go-kivik/kiviktest/v4/kt"
 )
 
 // RegisterMemoryDBSuite registers the MemoryDB integration test suite.

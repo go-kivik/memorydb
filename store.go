@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kivik/kivik/driver"
-	"github.com/go-kivik/kivik/errors"
+	"github.com/go-kivik/kivik/v4/driver"
+	"github.com/go-kivik/kivik/v4/errors"
 )
 
 type file struct {

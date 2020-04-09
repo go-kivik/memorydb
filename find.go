@@ -8,7 +8,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/go-kivik/kivik/driver"
+	"github.com/go-kivik/kivik/v4/driver"
 	"github.com/go-kivik/mango"
 )
 
@@ -46,21 +46,21 @@ func (i *indexSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-var _ driver.Finder = &db{}
+var _ driver.OptsFinder = &db{}
 
-func (d *db) CreateIndex(_ context.Context, ddoc, name string, index interface{}) error {
+func (d *db) CreateIndex(_ context.Context, ddoc, name string, index interface{}, opts map[string]interface{}) error {
 	return errFindNotImplemented
 }
 
-func (d *db) GetIndexes(_ context.Context) ([]driver.Index, error) {
+func (d *db) GetIndexes(_ context.Context, opts map[string]interface{}) ([]driver.Index, error) {
 	return nil, errFindNotImplemented
 }
 
-func (d *db) DeleteIndex(_ context.Context, ddoc, name string) error {
+func (d *db) DeleteIndex(_ context.Context, ddoc, name string, opts map[string]interface{}) error {
 	return errFindNotImplemented
 }
 
-func (d *db) Find(_ context.Context, query interface{}) (driver.Rows, error) {
+func (d *db) Find(_ context.Context, query interface{}, opts map[string]interface{}) (driver.Rows, error) {
 	queryJSON, err := toJSON(query)
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func (d *db) Find(_ context.Context, query interface{}) (driver.Rows, error) {
 	return rows, nil
 }
 
-func (d *db) Explain(_ context.Context, query interface{}) (*driver.QueryPlan, error) {
+func (d *db) Explain(_ context.Context, query interface{}, opts map[string]interface{}) (*driver.QueryPlan, error) {
 	return nil, errFindNotImplemented
 }
 
