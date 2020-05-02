@@ -11,7 +11,6 @@ import (
 
 	"github.com/go-kivik/kivik/v4"
 	"github.com/go-kivik/kivik/v4/driver"
-	"github.com/go-kivik/kivik/v4/errors"
 )
 
 type memDriver struct{}
@@ -71,11 +70,11 @@ var validNames = map[string]struct{}{
 
 func (c *client) CreateDB(ctx context.Context, dbName string, options map[string]interface{}) error {
 	if exists, _ := c.DBExists(ctx, dbName, options); exists {
-		return errors.Status(http.StatusPreconditionFailed, "database exists")
+		return &kivik.Error{HTTPStatus: http.StatusPreconditionFailed, Message: "database exists"}
 	}
 	if _, ok := validNames[dbName]; !ok {
 		if !validDBName.MatchString(dbName) {
-			return errors.Status(http.StatusBadRequest, "invalid database name")
+			return &kivik.Error{HTTPStatus: http.StatusBadRequest, Message: "invalid database name"}
 		}
 	}
 	c.mutex.Lock()
@@ -89,7 +88,7 @@ func (c *client) CreateDB(ctx context.Context, dbName string, options map[string
 
 func (c *client) DestroyDB(ctx context.Context, dbName string, options map[string]interface{}) error {
 	if exists, _ := c.DBExists(ctx, dbName, options); !exists {
-		return errors.Status(http.StatusNotFound, "database does not exist")
+		return &kivik.Error{HTTPStatus: http.StatusNotFound, Message: "database does not exist"}
 	}
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -102,7 +101,7 @@ func (c *client) DestroyDB(ctx context.Context, dbName string, options map[strin
 
 func (c *client) DB(ctx context.Context, dbName string, options map[string]interface{}) (driver.DB, error) {
 	if exists, _ := c.DBExists(ctx, dbName, options); !exists {
-		return nil, errors.Status(http.StatusNotFound, "database does not exist")
+		return nil, &kivik.Error{HTTPStatus: http.StatusNotFound, Message: "database does not exist"}
 	}
 	return &db{
 		client: c,
