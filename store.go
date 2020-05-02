@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-kivik/kivik/v4"
 	"github.com/go-kivik/kivik/v4/driver"
-	"github.com/go-kivik/kivik/v4/errors"
 )
 
 type file struct {
@@ -96,11 +96,11 @@ func toCouchDoc(i interface{}) (couchDoc, error) {
 	}
 	asJSON, err := json.Marshal(i)
 	if err != nil {
-		return nil, errors.WrapStatus(http.StatusBadRequest, err)
+		return nil, &kivik.Error{HTTPStatus: http.StatusBadRequest, Err: err}
 	}
 	var m couchDoc
 	if e := json.Unmarshal(asJSON, &m); e != nil {
-		return nil, errors.Status(http.StatusInternalServerError, "failed to decode encoded document; this is a bug!")
+		return nil, &kivik.Error{HTTPStatus: http.StatusInternalServerError, Message: "failed to decode encoded document; this is a bug!"}
 	}
 	return m, nil
 }

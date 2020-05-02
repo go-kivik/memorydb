@@ -461,7 +461,7 @@ func TestDeleteDoc(t *testing.T) {
 			ID:     "foo",
 			Rev:    "invalid rev format",
 			Status: 400,
-			Error:  "Invalid rev format",
+			Error:  "invalid rev format",
 		},
 		{
 			Name: "LocalNoRev",
