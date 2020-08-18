@@ -69,13 +69,7 @@ func TestDBExists(t *testing.T) {
 			t.Run(test.Name, func(t *testing.T) {
 				c := setup(t, test.Setup)
 				result, err := c.DBExists(context.Background(), test.DBName, nil)
-				var msg string
-				if err != nil {
-					msg = err.Error()
-				}
-				if test.Error != msg {
-					t.Errorf("Unexpected error: %s", msg)
-				}
+				testy.Error(t, test.Error, err)
 				if result != test.Expected {
 					t.Errorf("Expected: %t, Actual: %t", test.Expected, result)
 				}
@@ -237,11 +231,6 @@ func TestDB(t *testing.T) {
 	}
 	tests := []dbTest{
 		{
-			Name:   "NoDBs",
-			DBName: "foo",
-			Error:  "database does not exist",
-		},
-		{
 			Name:   "ExistingDB",
 			DBName: "foo",
 			Setup: func(c driver.Client) {
@@ -250,22 +239,12 @@ func TestDB(t *testing.T) {
 				}
 			},
 		},
-		{
-			Name:   "OtherDB",
-			DBName: "foo",
-			Setup: func(c driver.Client) {
-				if err := c.CreateDB(context.Background(), "bar", nil); err != nil {
-					panic(err)
-				}
-			},
-			Error: "database does not exist",
-		},
 	}
 	for _, test := range tests {
 		func(test dbTest) {
 			t.Run(test.Name, func(t *testing.T) {
 				c := setup(t, test.Setup)
-				_, err := c.DB(context.Background(), test.DBName, nil)
+				_, err := c.DB(test.DBName, nil)
 				var msg string
 				if err != nil {
 					msg = err.Error()

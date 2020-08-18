@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"net/http"
 	"strings"
 
+	"github.com/go-kivik/kivik/v4"
 	"github.com/go-kivik/kivik/v4/driver"
 	"github.com/go-kivik/mango"
 )
@@ -60,7 +62,10 @@ func (d *db) DeleteIndex(_ context.Context, ddoc, name string, opts map[string]i
 	return errFindNotImplemented
 }
 
-func (d *db) Find(_ context.Context, query interface{}, opts map[string]interface{}) (driver.Rows, error) {
+func (d *db) Find(ctx context.Context, query interface{}, opts map[string]interface{}) (driver.Rows, error) {
+	if exists, _ := d.DBExists(ctx, d.dbName, nil); !exists {
+		return nil, &kivik.Error{HTTPStatus: http.StatusNotFound, Message: "database does not exist"}
+	}
 	queryJSON, err := toJSON(query)
 	if err != nil {
 		return nil, err

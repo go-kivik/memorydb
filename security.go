@@ -21,7 +21,10 @@ func cloneSecurity(in *driver.Security) *driver.Security {
 	}
 }
 
-func (d *db) Security(_ context.Context) (*driver.Security, error) {
+func (d *db) Security(ctx context.Context) (*driver.Security, error) {
+	if exists, _ := d.DBExists(ctx, d.dbName, nil); !exists {
+		return nil, &kivik.Error{HTTPStatus: http.StatusNotFound, Message: "database does not exist"}
+	}
 	d.db.mu.RLock()
 	defer d.db.mu.RUnlock()
 	if d.db.deleted {

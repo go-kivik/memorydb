@@ -99,10 +99,7 @@ func (c *client) DestroyDB(ctx context.Context, dbName string, options map[strin
 	return nil
 }
 
-func (c *client) DB(ctx context.Context, dbName string, options map[string]interface{}) (driver.DB, error) {
-	if exists, _ := c.DBExists(ctx, dbName, options); !exists {
-		return nil, &kivik.Error{HTTPStatus: http.StatusNotFound, Message: "database does not exist"}
-	}
+func (c *client) DB(dbName string, options map[string]interface{}) (driver.DB, error) {
 	return &db{
 		client: c,
 		dbName: dbName,

@@ -5,11 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 
+	"github.com/go-kivik/kivik/v4"
 	"github.com/go-kivik/kivik/v4/driver"
 )
 
 func (d *db) AllDocs(ctx context.Context, opts map[string]interface{}) (driver.Rows, error) {
+	if exists, _ := d.DBExists(ctx, d.dbName, nil); !exists {
+		return nil, &kivik.Error{HTTPStatus: http.StatusNotFound, Message: "database does not exist"}
+	}
 	rows := &alldocsResults{
 		resultSet{
 			docIDs: make([]string, 0),
