@@ -37,7 +37,7 @@ func TestStats(t *testing.T) {
 		func(test statTest) {
 			t.Run(test.Name, func(t *testing.T) {
 				c := setup(t, test.Setup)
-				db, err := c.DB(context.Background(), test.DBName, nil)
+				db, err := c.DB(test.DBName, nil)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -65,7 +65,7 @@ func setupDB(t *testing.T) *db {
 	if err := c.CreateDB(context.Background(), "foo", nil); err != nil {
 		t.Fatal(err)
 	}
-	d, err := c.DB(context.Background(), "foo", nil)
+	d, err := c.DB("foo", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -217,7 +217,7 @@ func TestPut(t *testing.T) {
 				if err := c.CreateDB(context.Background(), "deleted0", nil); err != nil {
 					t.Fatal(err)
 				}
-				db, err := c.DB(context.Background(), "deleted0", nil)
+				db, err := c.DB("deleted0", nil)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -384,7 +384,7 @@ func TestGet(t *testing.T) {
 				if err := c.CreateDB(context.Background(), "deleted0", nil); err != nil {
 					t.Fatal(err)
 				}
-				db, err := c.DB(context.Background(), "deleted0", nil)
+				db, err := c.DB("deleted0", nil)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -495,7 +495,7 @@ func TestDeleteDoc(t *testing.T) {
 				if err := c.CreateDB(context.Background(), "deleted0", nil); err != nil {
 					t.Fatal(err)
 				}
-				db, err := c.DB(context.Background(), "deleted0", nil)
+				db, err := c.DB("deleted0", nil)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -580,7 +580,7 @@ func TestCreateDoc(t *testing.T) {
 				if err := c.CreateDB(context.Background(), "deleted0", nil); err != nil {
 					t.Fatal(err)
 				}
-				db, err := c.DB(context.Background(), "deleted0", nil)
+				db, err := c.DB("deleted0", nil)
 				if err != nil {
 					t.Fatal(err)
 				}

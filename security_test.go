@@ -18,13 +18,13 @@ func TestGetSecurity(t *testing.T) {
 	tests := []secTest{
 		{
 			Name:  "DBNotFound",
-			Error: "missing",
+			Error: "database does not exist",
 			DB: func() driver.DB {
 				c := setup(t, nil)
 				if err := c.CreateDB(context.Background(), "foo", nil); err != nil {
 					t.Fatal(err)
 				}
-				db, err := c.DB(context.Background(), "foo", nil)
+				db, err := c.DB("foo", nil)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -35,13 +35,31 @@ func TestGetSecurity(t *testing.T) {
 			}(),
 		},
 		{
-			Name:     "EmptySecurity",
+			Name: "EmptySecurity",
+			DB: func() driver.DB {
+				c := setup(t, nil)
+				if err := c.CreateDB(context.Background(), "foo", nil); err != nil {
+					t.Fatal(err)
+				}
+				db, err := c.DB("foo", nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+				return db
+			}(),
 			Expected: &driver.Security{},
 		},
 		{
 			Name: "AdminsAndMembers",
 			DB: func() driver.DB {
+				c := setup(t, nil)
+				if err := c.CreateDB(context.Background(), "foo", nil); err != nil {
+					t.Fatal(err)
+				}
+
 				db := &db{
+					dbName: "foo",
+					client: c.(*client),
 					db: &database{
 						security: &driver.Security{
 							Admins: driver.Members{
@@ -78,16 +96,7 @@ func TestGetSecurity(t *testing.T) {
 					db = setupDB(t)
 				}
 				sec, err := db.Security(context.Background())
-				var msg string
-				if err != nil {
-					msg = err.Error()
-				}
-				if msg != test.Error {
-					t.Errorf("Unexpected error: %s", msg)
-				}
-				if err != nil {
-					return
-				}
+				testy.Error(t, test.Error, err)
 				if d := testy.DiffAsJSON(test.Expected, sec); d != nil {
 					t.Error(d)
 				}
@@ -113,7 +122,7 @@ func TestSetSecurity(t *testing.T) {
 				if err := c.CreateDB(context.Background(), "foo", nil); err != nil {
 					t.Fatal(err)
 				}
-				db, err := c.DB(context.Background(), "foo", nil)
+				db, err := c.DB("foo", nil)
 				if err != nil {
 					t.Fatal(err)
 				}
