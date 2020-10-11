@@ -35,7 +35,7 @@ const (
 	Vendor  = "Kivik Memory Adaptor"
 )
 
-func (d *memDriver) NewClient(name string) (driver.Client, error) {
+func (d *memDriver) NewClient(name string, _ map[string]interface{}) (driver.Client, error) {
 	return &client{
 		version: &driver.Version{
 			Version:     Version,
