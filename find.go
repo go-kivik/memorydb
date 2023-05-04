@@ -64,7 +64,7 @@ func (d *db) DeleteIndex(_ context.Context, ddoc, name string, opts map[string]i
 
 func (d *db) Find(ctx context.Context, query interface{}, opts map[string]interface{}) (driver.Rows, error) {
 	if exists, _ := d.DBExists(ctx, d.dbName, nil); !exists {
-		return nil, &kivik.Error{HTTPStatus: http.StatusNotFound, Message: "database does not exist"}
+		return nil, &kivik.Error{Status: http.StatusNotFound, Message: "database does not exist"}
 	}
 	queryJSON, err := toJSON(query)
 	if err != nil {
@@ -134,7 +134,7 @@ func (r *findResults) Next(row *driver.Row) error {
 	if err != nil {
 		return err
 	}
-	row.Doc = doc
+	row.Doc = bytes.NewReader(doc)
 	r.revs = r.revs[1:]
 	return nil
 }

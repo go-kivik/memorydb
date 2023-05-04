@@ -521,7 +521,7 @@ func TestDeleteDoc(t *testing.T) {
 				var status int
 				if err != nil {
 					msg = err.Error()
-					status = kivik.StatusCode(err)
+					status = kivik.HTTPStatus(err)
 				}
 				if msg != test.Error {
 					t.Errorf("Unexpected error: %s", msg)

@@ -1,6 +1,7 @@
 package memorydb
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -13,7 +14,7 @@ import (
 
 func (d *db) AllDocs(ctx context.Context, opts map[string]interface{}) (driver.Rows, error) {
 	if exists, _ := d.DBExists(ctx, d.dbName, nil); !exists {
-		return nil, &kivik.Error{HTTPStatus: http.StatusNotFound, Message: "database does not exist"}
+		return nil, &kivik.Error{Status: http.StatusNotFound, Message: "database does not exist"}
 	}
 	rows := &alldocsResults{
 		resultSet{
@@ -62,13 +63,12 @@ func (r *alldocsResults) Next(row *driver.Row) error {
 	var next *revision
 	next, r.revs = r.revs[0], r.revs[1:]
 	row.Key = []byte(fmt.Sprintf(`"%s"`, row.ID))
-	value := map[string]string{
+	value, err := json.Marshal(map[string]string{
 		"rev": fmt.Sprintf("%d-%s", next.ID, next.Rev),
-	}
-	var err error
-	row.Value, err = json.Marshal(value)
+	})
 	if err != nil {
 		panic(err)
 	}
+	row.Value = bytes.NewReader(value)
 	return nil
 }

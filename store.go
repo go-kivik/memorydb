@@ -96,11 +96,11 @@ func toCouchDoc(i interface{}) (couchDoc, error) {
 	}
 	asJSON, err := json.Marshal(i)
 	if err != nil {
-		return nil, &kivik.Error{HTTPStatus: http.StatusBadRequest, Err: err}
+		return nil, &kivik.Error{Status: http.StatusBadRequest, Err: err}
 	}
 	var m couchDoc
 	if e := json.Unmarshal(asJSON, &m); e != nil {
-		return nil, &kivik.Error{HTTPStatus: http.StatusInternalServerError, Message: "failed to decode encoded document; this is a bug!"}
+		return nil, &kivik.Error{Status: http.StatusInternalServerError, Message: "failed to decode encoded document; this is a bug!"}
 	}
 	return m, nil
 }

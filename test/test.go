@@ -42,7 +42,7 @@ func RegisterMemoryDBSuite() {
 
 		"Get/RW/group/Admin/bogus.status": http.StatusNotFound,
 
-		"GetMeta/RW/group/Admin/bogus.status": http.StatusNotFound,
+		"GetRev/RW/group/Admin/bogus.status": http.StatusNotFound,
 
 		"Put/RW/Admin/group/LeadingUnderscoreInID.status": http.StatusBadRequest,
 		"Put/RW/Admin/group/Conflict.status":              http.StatusConflict,
