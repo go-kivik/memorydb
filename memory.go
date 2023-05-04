@@ -70,11 +70,11 @@ var validNames = map[string]struct{}{
 
 func (c *client) CreateDB(ctx context.Context, dbName string, options map[string]interface{}) error {
 	if exists, _ := c.DBExists(ctx, dbName, options); exists {
-		return &kivik.Error{HTTPStatus: http.StatusPreconditionFailed, Message: "database exists"}
+		return &kivik.Error{Status: http.StatusPreconditionFailed, Message: "database exists"}
 	}
 	if _, ok := validNames[dbName]; !ok {
 		if !validDBName.MatchString(dbName) {
-			return &kivik.Error{HTTPStatus: http.StatusBadRequest, Message: "invalid database name"}
+			return &kivik.Error{Status: http.StatusBadRequest, Message: "invalid database name"}
 		}
 	}
 	c.mutex.Lock()
@@ -88,7 +88,7 @@ func (c *client) CreateDB(ctx context.Context, dbName string, options map[string
 
 func (c *client) DestroyDB(ctx context.Context, dbName string, options map[string]interface{}) error {
 	if exists, _ := c.DBExists(ctx, dbName, options); !exists {
-		return &kivik.Error{HTTPStatus: http.StatusNotFound, Message: "database does not exist"}
+		return &kivik.Error{Status: http.StatusNotFound, Message: "database does not exist"}
 	}
 	c.mutex.Lock()
 	defer c.mutex.Unlock()

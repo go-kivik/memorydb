@@ -230,7 +230,7 @@ func TestFindDoc(t *testing.T) {
 			}
 			_ = rows.Close()
 			var result map[string]interface{}
-			if e := json.Unmarshal(row.Doc, &result); e != nil {
+			if e := json.NewDecoder(row.Doc).Decode(&result); e != nil {
 				t.Fatal(e)
 			}
 			parts := strings.Split(result["_rev"].(string), "-")
