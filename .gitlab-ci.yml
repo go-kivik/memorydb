@@ -12,7 +12,7 @@ variables:
 
 lint:
     stage: test
-    image: golangci/golangci-lint:v1.26
+    image: golangci/golangci-lint:v1.52.2
     script:
         - go mod download
         - golangci-lint run ./...
