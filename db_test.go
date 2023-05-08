@@ -293,8 +293,7 @@ func TestGet(t *testing.T) {
 				ID:   "foo",
 				DB:   db,
 				doc: &driver.Document{
-					ContentLength: 69,
-					Rev:           rev,
+					Rev: rev,
 				},
 				Expected: map[string]string{"_id": "foo", "foo": "bar"},
 			}
@@ -313,8 +312,7 @@ func TestGet(t *testing.T) {
 					"rev": rev,
 				},
 				doc: &driver.Document{
-					ContentLength: 69,
-					Rev:           rev,
+					Rev: rev,
 				},
 				Expected: map[string]string{"_id": "foo", "foo": "Bar"},
 			}
@@ -337,8 +335,7 @@ func TestGet(t *testing.T) {
 					"rev": rev,
 				},
 				doc: &driver.Document{
-					ContentLength: 69,
-					Rev:           rev,
+					Rev: rev,
 				},
 				Expected: map[string]string{"_id": "foo", "foo": "Bar"},
 			}

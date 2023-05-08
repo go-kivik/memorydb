@@ -37,9 +37,8 @@ func (d *db) Get(ctx context.Context, docID string, opts map[string]interface{})
 	if rev, ok := opts["rev"].(string); ok {
 		if doc, found := d.db.getRevision(docID, rev); found {
 			return &driver.Document{
-				ContentLength: int64(len(doc.data)),
-				Rev:           rev,
-				Body:          ioutil.NopCloser(bytes.NewReader(doc.data)),
+				Rev:  rev,
+				Body: ioutil.NopCloser(bytes.NewReader(doc.data)),
 			}, nil
 		}
 		return nil, &kivik.Error{Status: http.StatusNotFound, Message: "missing"}
@@ -49,9 +48,8 @@ func (d *db) Get(ctx context.Context, docID string, opts map[string]interface{})
 		return nil, &kivik.Error{Status: http.StatusNotFound, Message: "missing"}
 	}
 	return &driver.Document{
-		ContentLength: int64(len(last.data)),
-		Rev:           fmt.Sprintf("%d-%s", last.ID, last.Rev),
-		Body:          ioutil.NopCloser(bytes.NewReader(last.data)),
+		Rev:  fmt.Sprintf("%d-%s", last.ID, last.Rev),
+		Body: ioutil.NopCloser(bytes.NewReader(last.data)),
 	}, nil
 }
 

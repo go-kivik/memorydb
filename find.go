@@ -48,7 +48,7 @@ func (i *indexSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-var _ driver.OptsFinder = &db{}
+var _ driver.Finder = &db{}
 
 func (d *db) CreateIndex(_ context.Context, ddoc, name string, index interface{}, opts map[string]interface{}) error {
 	return errFindNotImplemented
