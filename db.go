@@ -106,10 +106,11 @@ func validRev(rev string) bool {
 	return revRE.MatchString(rev)
 }
 
-func (d *db) Delete(ctx context.Context, docID, rev string, _ map[string]interface{}) (newRev string, err error) {
+func (d *db) Delete(ctx context.Context, docID string, opts map[string]interface{}) (newRev string, err error) {
 	if exists, _ := d.client.DBExists(ctx, d.dbName, nil); !exists {
 		return "", &kivik.Error{Status: http.StatusPreconditionFailed, Message: "database does not exist"}
 	}
+	rev, _ := opts["rev"].(string)
 	if !strings.HasPrefix(docID, "_local/") && !validRev(rev) {
 		return "", &kivik.Error{Status: http.StatusBadRequest, Message: "invalid rev format"}
 	}
@@ -155,7 +156,7 @@ func (d *db) Changes(ctx context.Context, opts map[string]interface{}) (driver.C
 	return nil, notYetImplemented
 }
 
-func (d *db) PutAttachment(_ context.Context, _, _ string, _ *driver.Attachment, _ map[string]interface{}) (string, error) {
+func (d *db) PutAttachment(_ context.Context, _ string, _ *driver.Attachment, _ map[string]interface{}) (string, error) {
 	// FIXME: Unimplemented
 	return "", notYetImplemented
 }
@@ -165,7 +166,7 @@ func (d *db) GetAttachment(ctx context.Context, docID, filename string, opts map
 	return nil, notYetImplemented
 }
 
-func (d *db) DeleteAttachment(ctx context.Context, docID, rev, filename string, opts map[string]interface{}) (newRev string, err error) {
+func (d *db) DeleteAttachment(ctx context.Context, docID, filename string, opts map[string]interface{}) (newRev string, err error) {
 	// FIXME: Unimplemented
 	return "", notYetImplemented
 }

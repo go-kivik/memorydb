@@ -171,7 +171,7 @@ func TestPut(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				if _, e := db.Delete(context.Background(), "foo", rev, nil); e != nil {
+				if _, e := db.Delete(context.Background(), "foo", kivik.Options{"rev": rev}); e != nil {
 					t.Fatal(e)
 				}
 				return db
@@ -363,7 +363,7 @@ func TestGet(t *testing.T) {
 			if err != nil {
 				panic(err)
 			}
-			if _, e := db.Delete(context.Background(), "foo", rev, nil); e != nil {
+			if _, e := db.Delete(context.Background(), "foo", kivik.Options{"rev": rev}); e != nil {
 				panic(e)
 			}
 			return getTest{
@@ -513,7 +513,7 @@ func TestDeleteDoc(t *testing.T) {
 				if db == nil {
 					db = setupDB(t)
 				}
-				rev, err := db.Delete(context.Background(), test.ID, test.Rev, nil)
+				rev, err := db.Delete(context.Background(), test.ID, kivik.Options{"rev": test.Rev})
 				var msg string
 				var status int
 				if err != nil {
