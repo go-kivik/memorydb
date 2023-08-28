@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/go-kivik/kivik/v4"
-	"github.com/go-kivik/kiviktest/v4"
-	"github.com/go-kivik/kiviktest/v4/kt"
+	"github.com/go-kivik/kivik/v4/kiviktest"
+	"github.com/go-kivik/kivik/v4/kiviktest/kt"
 )
 
 // RegisterMemoryDBSuite registers the MemoryDB integration test suite.
@@ -97,9 +97,10 @@ func MemoryTest(t *testing.T) {
 	clients := &kt.Context{
 		RW:    true,
 		Admin: client,
+		T:     t,
 	}
 	if err := client.CreateDB(context.Background(), "_users"); err != nil {
 		t.Fatal(err)
 	}
-	kiviktest.RunTestsInternal(clients, kiviktest.SuiteKivikMemory, t)
+	kiviktest.RunTestsInternal(clients, kiviktest.SuiteKivikMemory)
 }
