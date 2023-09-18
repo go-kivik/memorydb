@@ -88,7 +88,7 @@ func TestPut(t *testing.T) {
 			DocID:  "_badid",
 			Doc:    map[string]string{"_id": "_badid", "foo": "bar"},
 			Status: 400,
-			Error:  "Only reserved document ids may start with underscore.",
+			Error:  "only reserved document ids may start with underscore",
 		},
 		{
 			Name:     "MismatchedIDs",
@@ -545,7 +545,6 @@ func TestDeleteDoc(t *testing.T) {
 				if d := testy.DiffAsJSON(expected, doc); d != nil {
 					t.Error(d)
 				}
-
 			})
 		}(test)
 	}

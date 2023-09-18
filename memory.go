@@ -4,6 +4,7 @@ package memorydb
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -62,19 +63,21 @@ func (c *client) DBExists(_ context.Context, dbName string, _ map[string]interfa
 }
 
 // Copied verbatim from http://docs.couchdb.org/en/2.0.0/api/database/common.html#head--db
-var validDBName = regexp.MustCompile("^[a-z][a-z0-9_$()+/-]*$")
-var validNames = map[string]struct{}{
-	"_users":      {},
-	"_replicator": {},
-}
+var (
+	validDBName = regexp.MustCompile("^[a-z][a-z0-9_$()+/-]*$")
+	validNames  = map[string]struct{}{
+		"_users":      {},
+		"_replicator": {},
+	}
+)
 
 func (c *client) CreateDB(ctx context.Context, dbName string, options map[string]interface{}) error {
 	if exists, _ := c.DBExists(ctx, dbName, options); exists {
-		return &kivik.Error{Status: http.StatusPreconditionFailed, Message: "database exists"}
+		return statusError{status: http.StatusPreconditionFailed, error: errors.New("database exists")}
 	}
 	if _, ok := validNames[dbName]; !ok {
 		if !validDBName.MatchString(dbName) {
-			return &kivik.Error{Status: http.StatusBadRequest, Message: "invalid database name"}
+			return statusError{status: http.StatusBadRequest, error: errors.New("invalid database name")}
 		}
 	}
 	c.mutex.Lock()
@@ -88,7 +91,7 @@ func (c *client) CreateDB(ctx context.Context, dbName string, options map[string
 
 func (c *client) DestroyDB(ctx context.Context, dbName string, options map[string]interface{}) error {
 	if exists, _ := c.DBExists(ctx, dbName, options); !exists {
-		return &kivik.Error{Status: http.StatusNotFound, Message: "database does not exist"}
+		return statusError{status: http.StatusNotFound, error: errors.New("database does not exist")}
 	}
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
