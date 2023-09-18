@@ -9,11 +9,12 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/go-kivik/kivik/v4"
 	"github.com/go-kivik/kivik/v4/driver"
 )
 
-func (d *db) AllDocs(ctx context.Context, opts map[string]interface{}) (driver.Rows, error) {
-	if exists, _ := d.DBExists(ctx, d.dbName, nil); !exists {
+func (d *db) AllDocs(ctx context.Context, _ driver.Options) (driver.Rows, error) {
+	if exists, _ := d.DBExists(ctx, d.dbName, kivik.Params(nil)); !exists {
 		return nil, statusError{status: http.StatusNotFound, error: errors.New("database does not exist")}
 	}
 	rows := &alldocsResults{

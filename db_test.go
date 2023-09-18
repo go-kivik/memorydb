@@ -77,7 +77,7 @@ func TestPut(t *testing.T) {
 		Name     string
 		DocID    string
 		Doc      interface{}
-		Setup    func() driver.DB
+		Setup    func() *db
 		Expected interface{}
 		Status   int
 		Error    string
@@ -106,7 +106,7 @@ func TestPut(t *testing.T) {
 			Name:  "Conflict",
 			DocID: "foo",
 			Doc:   map[string]string{"_id": "foo", "_rev": "bar"},
-			Setup: func() driver.DB {
+			Setup: func() *db {
 				db := setupDB(t)
 				if _, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo"}, nil); err != nil {
 					t.Fatal(err)
@@ -135,15 +135,15 @@ func TestPut(t *testing.T) {
 			Error:  "document update conflict",
 		},
 		func() putTest {
-			db := setupDB(t)
-			rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "bar"}, nil)
+			dbv := setupDB(t)
+			rev, err := dbv.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "bar"}, nil)
 			if err != nil {
 				panic(err)
 			}
 			return putTest{
 				Name:     "Update",
 				DocID:    "foo",
-				Setup:    func() driver.DB { return db },
+				Setup:    func() *db { return dbv },
 				Doc:      map[string]string{"_id": "foo", "_rev": rev},
 				Expected: map[string]string{"_id": "foo", "_rev": "2-xxx"},
 			}
@@ -165,13 +165,13 @@ func TestPut(t *testing.T) {
 			DocID:    "foo",
 			Doc:      map[string]string{"foo": "bar"},
 			Expected: map[string]string{"_id": "foo", "foo": "bar", "_rev": "3-xxx"},
-			Setup: func() driver.DB {
+			Setup: func() *db {
 				db := setupDB(t)
 				rev, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo"}, nil)
 				if err != nil {
 					t.Fatal(err)
 				}
-				if _, e := db.Delete(context.Background(), "foo", kivik.Options{"rev": rev}); e != nil {
+				if _, e := db.Delete(context.Background(), "foo", kivik.Rev(rev)); e != nil {
 					t.Fatal(e)
 				}
 				return db
@@ -182,7 +182,7 @@ func TestPut(t *testing.T) {
 			DocID:    "_local/foo",
 			Doc:      map[string]string{"foo": "baz"},
 			Expected: map[string]string{"_id": "_local/foo", "foo": "baz", "_rev": "1-0"},
-			Setup: func() driver.DB {
+			Setup: func() *db {
 				db := setupDB(t)
 				_, err := db.Put(context.Background(), "_local/foo", map[string]string{"foo": "bar"}, nil)
 				if err != nil {
@@ -212,19 +212,19 @@ func TestPut(t *testing.T) {
 		},
 		{
 			Name: "Deleted DB",
-			Setup: func() driver.DB {
+			Setup: func() *db {
 				c := setup(t, nil)
 				if err := c.CreateDB(context.Background(), "deleted0", nil); err != nil {
 					t.Fatal(err)
 				}
-				db, err := c.DB("deleted0", nil)
+				dbv, err := c.DB("deleted0", nil)
 				if err != nil {
 					t.Fatal(err)
 				}
 				if e := c.DestroyDB(context.Background(), "deleted0", nil); e != nil {
 					t.Fatal(e)
 				}
-				return db
+				return dbv.(*db)
 			},
 			Status: http.StatusPreconditionFailed,
 			Error:  "database does not exist",
@@ -234,7 +234,7 @@ func TestPut(t *testing.T) {
 		func(test putTest) {
 			t.Run(test.Name, func(t *testing.T) {
 				t.Parallel()
-				var db driver.DB
+				var db *db
 				if test.Setup != nil {
 					db = test.Setup()
 				} else {
@@ -242,7 +242,7 @@ func TestPut(t *testing.T) {
 				}
 				_, err := db.Put(context.Background(), test.DocID, test.Doc, nil)
 				testy.StatusError(t, test.Error, test.Status, err)
-				doc, err := db.Get(context.Background(), test.DocID, nil)
+				doc, err := db.Get(context.Background(), test.DocID, kivik.Params(nil))
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -268,8 +268,8 @@ func TestGet(t *testing.T) {
 	type getTest struct {
 		Name     string
 		ID       string
-		Opts     map[string]interface{}
-		DB       driver.DB
+		options  kivik.Option
+		DB       *db
 		Status   int
 		Error    string
 		doc      *driver.Document
@@ -305,12 +305,10 @@ func TestGet(t *testing.T) {
 				panic(err)
 			}
 			return getTest{
-				Name: "SpecificRev",
-				ID:   "foo",
-				DB:   db,
-				Opts: map[string]interface{}{
-					"rev": rev,
-				},
+				Name:    "SpecificRev",
+				ID:      "foo",
+				DB:      db,
+				options: kivik.Rev(rev),
 				doc: &driver.Document{
 					Rev: rev,
 				},
@@ -328,12 +326,10 @@ func TestGet(t *testing.T) {
 				panic(err)
 			}
 			return getTest{
-				Name: "OldRev",
-				ID:   "foo",
-				DB:   db,
-				Opts: map[string]interface{}{
-					"rev": rev,
-				},
+				Name:    "OldRev",
+				ID:      "foo",
+				DB:      db,
+				options: kivik.Rev(rev),
 				doc: &driver.Document{
 					Rev: rev,
 				},
@@ -341,12 +337,10 @@ func TestGet(t *testing.T) {
 			}
 		}(),
 		{
-			Name: "MissingRev",
-			ID:   "foo",
-			Opts: map[string]interface{}{
-				"rev": "1-4c6114c65e295552ab1019e2b046b10e",
-			},
-			DB: func() driver.DB {
+			Name:    "MissingRev",
+			ID:      "foo",
+			options: kivik.Rev("1-4c6114c65e295552ab1019e2b046b10e"),
+			DB: func() *db {
 				db := setupDB(t)
 				_, err := db.Put(context.Background(), "foo", map[string]string{"_id": "foo", "foo": "Bar"}, nil)
 				if err != nil {
@@ -363,7 +357,7 @@ func TestGet(t *testing.T) {
 			if err != nil {
 				panic(err)
 			}
-			if _, e := db.Delete(context.Background(), "foo", kivik.Options{"rev": rev}); e != nil {
+			if _, e := db.Delete(context.Background(), "foo", kivik.Rev(rev)); e != nil {
 				panic(e)
 			}
 			return getTest{
@@ -376,19 +370,19 @@ func TestGet(t *testing.T) {
 		}(),
 		{
 			Name: "Deleted DB",
-			DB: func() driver.DB {
+			DB: func() *db {
 				c := setup(t, nil)
 				if err := c.CreateDB(context.Background(), "deleted0", nil); err != nil {
 					t.Fatal(err)
 				}
-				db, err := c.DB("deleted0", nil)
+				dbv, err := c.DB("deleted0", nil)
 				if err != nil {
 					t.Fatal(err)
 				}
 				if e := c.DestroyDB(context.Background(), "deleted0", nil); e != nil {
 					t.Fatal(e)
 				}
-				return db
+				return dbv.(*db)
 			}(),
 			Error:  "database does not exist",
 			Status: http.StatusPreconditionFailed,
@@ -402,7 +396,11 @@ func TestGet(t *testing.T) {
 				if db == nil {
 					db = setupDB(t)
 				}
-				doc, err := db.Get(context.Background(), test.ID, test.Opts)
+				opts := test.options
+				if opts == nil {
+					opts = kivik.Params(nil)
+				}
+				doc, err := db.Get(context.Background(), test.ID, opts)
 				testy.StatusError(t, test.Error, test.Status, err)
 				var result map[string]interface{}
 				if err := json.NewDecoder(doc.Body).Decode(&result); err != nil {
@@ -428,7 +426,7 @@ func TestDeleteDoc(t *testing.T) {
 		Name   string
 		ID     string
 		Rev    string
-		DB     driver.DB
+		DB     *db
 		Status int
 		Error  string
 	}
@@ -464,7 +462,7 @@ func TestDeleteDoc(t *testing.T) {
 			Name: "LocalNoRev",
 			ID:   "_local/foo",
 			Rev:  "",
-			DB: func() driver.DB {
+			DB: func() *db {
 				db := setupDB(t)
 				if _, err := db.Put(context.Background(), "_local/foo", map[string]string{"foo": "bar"}, nil); err != nil {
 					panic(err)
@@ -476,7 +474,7 @@ func TestDeleteDoc(t *testing.T) {
 			Name: "LocalWithRev",
 			ID:   "_local/foo",
 			Rev:  "0-1",
-			DB: func() driver.DB {
+			DB: func() *db {
 				db := setupDB(t)
 				if _, err := db.Put(context.Background(), "_local/foo", map[string]string{"foo": "bar"}, nil); err != nil {
 					panic(err)
@@ -487,19 +485,19 @@ func TestDeleteDoc(t *testing.T) {
 		{
 			Name: "DB deleted",
 			ID:   "foo",
-			DB: func() driver.DB {
+			DB: func() *db {
 				c := setup(t, nil)
 				if err := c.CreateDB(context.Background(), "deleted0", nil); err != nil {
 					t.Fatal(err)
 				}
-				db, err := c.DB("deleted0", nil)
+				dbv, err := c.DB("deleted0", nil)
 				if err != nil {
 					t.Fatal(err)
 				}
 				if e := c.DestroyDB(context.Background(), "deleted0", nil); e != nil {
 					t.Fatal(e)
 				}
-				return db
+				return dbv.(*db)
 			}(),
 			Status: http.StatusPreconditionFailed,
 			Error:  "database does not exist",
@@ -513,7 +511,7 @@ func TestDeleteDoc(t *testing.T) {
 				if db == nil {
 					db = setupDB(t)
 				}
-				rev, err := db.Delete(context.Background(), test.ID, kivik.Options{"rev": test.Rev})
+				rev, err := db.Delete(context.Background(), test.ID, kivik.Rev(test.Rev))
 				var msg string
 				var status int
 				if err != nil {
@@ -529,7 +527,7 @@ func TestDeleteDoc(t *testing.T) {
 				if err != nil {
 					return
 				}
-				row, err := db.Get(context.Background(), test.ID, map[string]interface{}{"rev": rev})
+				row, err := db.Get(context.Background(), test.ID, kivik.Rev(rev))
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -553,7 +551,7 @@ func TestDeleteDoc(t *testing.T) {
 func TestCreateDoc(t *testing.T) {
 	type cdTest struct {
 		Name     string
-		DB       driver.DB
+		DB       *db
 		Doc      interface{}
 		Expected map[string]interface{}
 		Error    string
@@ -571,19 +569,19 @@ func TestCreateDoc(t *testing.T) {
 		},
 		{
 			Name: "Deleted DB",
-			DB: func() driver.DB {
+			DB: func() *db {
 				c := setup(t, nil)
 				if err := c.CreateDB(context.Background(), "deleted0", nil); err != nil {
 					t.Fatal(err)
 				}
-				db, err := c.DB("deleted0", nil)
+				dbv, err := c.DB("deleted0", nil)
 				if err != nil {
 					t.Fatal(err)
 				}
 				if e := c.DestroyDB(context.Background(), "deleted0", nil); e != nil {
 					t.Fatal(e)
 				}
-				return db
+				return dbv.(*db)
 			}(),
 			Doc: map[string]interface{}{
 				"foo": "bar",
@@ -609,7 +607,7 @@ func TestCreateDoc(t *testing.T) {
 				if err != nil {
 					return
 				}
-				row, err := db.Get(context.Background(), docID, nil)
+				row, err := db.Get(context.Background(), docID, kivik.Params(nil))
 				if err != nil {
 					t.Fatal(err)
 				}
