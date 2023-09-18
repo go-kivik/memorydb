@@ -1,6 +1,6 @@
 module github.com/go-kivik/memorydb/v4
 
-go 1.17
+go 1.20
 
 require (
 	github.com/go-kivik/kivik/v4 v4.0.0-20230828083916-40cf6109d7f4
