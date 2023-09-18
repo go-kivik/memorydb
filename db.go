@@ -3,17 +3,17 @@ package memorydb
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strings"
 
-	"github.com/go-kivik/kivik/v4"
 	"github.com/go-kivik/kivik/v4/driver"
 )
 
-var notYetImplemented = &kivik.Error{Status: http.StatusNotImplemented, Message: "kivik: not yet implemented in memory driver"}
+var notYetImplemented = statusError{status: http.StatusNotImplemented, error: errors.New("kivik: not yet implemented in memory driver")}
 
 // database is an in-memory database representation.
 type db struct {
@@ -29,10 +29,10 @@ func (d *db) Query(ctx context.Context, ddoc, view string, opts map[string]inter
 
 func (d *db) Get(ctx context.Context, docID string, opts map[string]interface{}) (*driver.Document, error) {
 	if exists, _ := d.client.DBExists(ctx, d.dbName, nil); !exists {
-		return nil, &kivik.Error{Status: http.StatusPreconditionFailed, Message: "database does not exist"}
+		return nil, statusError{status: http.StatusPreconditionFailed, error: errors.New("database does not exist")}
 	}
 	if !d.db.docExists(docID) {
-		return nil, &kivik.Error{Status: http.StatusNotFound, Message: "missing"}
+		return nil, statusError{status: http.StatusNotFound, error: errors.New("missing")}
 	}
 	if rev, ok := opts["rev"].(string); ok {
 		if doc, found := d.db.getRevision(docID, rev); found {
@@ -41,11 +41,11 @@ func (d *db) Get(ctx context.Context, docID string, opts map[string]interface{})
 				Body: ioutil.NopCloser(bytes.NewReader(doc.data)),
 			}, nil
 		}
-		return nil, &kivik.Error{Status: http.StatusNotFound, Message: "missing"}
+		return nil, statusError{status: http.StatusNotFound, error: errors.New("missing")}
 	}
 	last, _ := d.db.latestRevision(docID)
 	if last.Deleted {
-		return nil, &kivik.Error{Status: http.StatusNotFound, Message: "missing"}
+		return nil, statusError{status: http.StatusNotFound, error: errors.New("missing")}
 	}
 	return &driver.Document{
 		Rev:  fmt.Sprintf("%d-%s", last.ID, last.Rev),
@@ -55,7 +55,7 @@ func (d *db) Get(ctx context.Context, docID string, opts map[string]interface{})
 
 func (d *db) CreateDoc(ctx context.Context, doc interface{}, _ map[string]interface{}) (docID, rev string, err error) {
 	if exists, _ := d.client.DBExists(ctx, d.dbName, nil); !exists {
-		return "", "", &kivik.Error{Status: http.StatusPreconditionFailed, Message: "database does not exist"}
+		return "", "", statusError{status: http.StatusPreconditionFailed, error: errors.New("database does not exist")}
 	}
 	couchDoc, err := toCouchDoc(doc)
 	if err != nil {
@@ -72,11 +72,11 @@ func (d *db) CreateDoc(ctx context.Context, doc interface{}, _ map[string]interf
 
 func (d *db) Put(ctx context.Context, docID string, doc interface{}, _ map[string]interface{}) (rev string, err error) {
 	if exists, _ := d.client.DBExists(ctx, d.dbName, nil); !exists {
-		return "", &kivik.Error{Status: http.StatusPreconditionFailed, Message: "database does not exist"}
+		return "", statusError{status: http.StatusPreconditionFailed, error: errors.New("database does not exist")}
 	}
 	isLocal := strings.HasPrefix(docID, "_local/")
 	if !isLocal && docID[0] == '_' && !strings.HasPrefix(docID, "_design/") {
-		return "", &kivik.Error{Status: http.StatusBadRequest, Message: "Only reserved document ids may start with underscore."}
+		return "", statusError{status: http.StatusBadRequest, error: errors.New("only reserved document ids may start with underscore")}
 	}
 	couchDoc, err := toCouchDoc(doc)
 	if err != nil {
@@ -88,14 +88,14 @@ func (d *db) Put(ctx context.Context, docID string, doc interface{}, _ map[strin
 
 	if last, ok := d.db.latestRevision(docID); ok {
 		if !last.Deleted && !isLocal && couchDoc.Rev() != fmt.Sprintf("%d-%s", last.ID, last.Rev) {
-			return "", &kivik.Error{Status: http.StatusConflict, Message: "document update conflict"}
+			return "", statusError{status: http.StatusConflict, error: errors.New("document update conflict")}
 		}
 		return d.db.addRevision(couchDoc), nil
 	}
 
 	if couchDoc.Rev() != "" {
 		// Rev should not be set for a new document
-		return "", &kivik.Error{Status: http.StatusConflict, Message: "document update conflict"}
+		return "", statusError{status: http.StatusConflict, error: errors.New("document update conflict")}
 	}
 	return d.db.addRevision(couchDoc), nil
 }
@@ -108,14 +108,14 @@ func validRev(rev string) bool {
 
 func (d *db) Delete(ctx context.Context, docID string, opts map[string]interface{}) (newRev string, err error) {
 	if exists, _ := d.client.DBExists(ctx, d.dbName, nil); !exists {
-		return "", &kivik.Error{Status: http.StatusPreconditionFailed, Message: "database does not exist"}
+		return "", statusError{status: http.StatusPreconditionFailed, error: errors.New("database does not exist")}
 	}
 	rev, _ := opts["rev"].(string)
 	if !strings.HasPrefix(docID, "_local/") && !validRev(rev) {
-		return "", &kivik.Error{Status: http.StatusBadRequest, Message: "invalid rev format"}
+		return "", statusError{status: http.StatusBadRequest, error: errors.New("invalid rev format")}
 	}
 	if !d.db.docExists(docID) {
-		return "", &kivik.Error{Status: http.StatusNotFound, Message: "missing"}
+		return "", statusError{status: http.StatusNotFound, error: errors.New("missing")}
 	}
 	return d.Put(ctx, docID, map[string]interface{}{
 		"_id":      docID,

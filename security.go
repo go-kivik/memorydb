@@ -2,9 +2,9 @@ package memorydb
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
-	"github.com/go-kivik/kivik/v4"
 	"github.com/go-kivik/kivik/v4/driver"
 )
 
@@ -23,12 +23,12 @@ func cloneSecurity(in *driver.Security) *driver.Security {
 
 func (d *db) Security(ctx context.Context) (*driver.Security, error) {
 	if exists, _ := d.DBExists(ctx, d.dbName, nil); !exists {
-		return nil, &kivik.Error{Status: http.StatusNotFound, Message: "database does not exist"}
+		return nil, statusError{status: http.StatusNotFound, error: errors.New("database does not exist")}
 	}
 	d.db.mu.RLock()
 	defer d.db.mu.RUnlock()
 	if d.db.deleted {
-		return nil, &kivik.Error{Status: http.StatusNotFound, Message: "missing"}
+		return nil, statusError{status: http.StatusNotFound, error: errors.New("missing")}
 	}
 	return cloneSecurity(d.db.security), nil
 }
@@ -37,7 +37,7 @@ func (d *db) SetSecurity(_ context.Context, sec *driver.Security) error {
 	d.db.mu.Lock()
 	defer d.db.mu.Unlock()
 	if d.db.deleted {
-		return &kivik.Error{Status: http.StatusNotFound, Message: "missing"}
+		return statusError{status: http.StatusNotFound, error: errors.New("missing")}
 	}
 	d.db.security = cloneSecurity(sec)
 	return nil

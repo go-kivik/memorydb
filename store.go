@@ -2,6 +2,7 @@ package memorydb
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -9,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kivik/kivik/v4"
 	"github.com/go-kivik/kivik/v4/driver"
 )
 
@@ -37,8 +37,10 @@ type database struct {
 	security *driver.Security
 }
 
-var rnd *rand.Rand
-var rndMU = &sync.Mutex{}
+var (
+	rnd   *rand.Rand
+	rndMU = &sync.Mutex{}
+)
 
 func init() {
 	rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -96,11 +98,11 @@ func toCouchDoc(i interface{}) (couchDoc, error) {
 	}
 	asJSON, err := json.Marshal(i)
 	if err != nil {
-		return nil, &kivik.Error{Status: http.StatusBadRequest, Err: err}
+		return nil, statusError{status: http.StatusBadRequest, error: err}
 	}
 	var m couchDoc
 	if e := json.Unmarshal(asJSON, &m); e != nil {
-		return nil, &kivik.Error{Status: http.StatusInternalServerError, Message: "failed to decode encoded document; this is a bug!"}
+		return nil, statusError{status: http.StatusInternalServerError, error: errors.New("THIS IS A BUG: failed to decode encoded document")}
 	}
 	return m, nil
 }
