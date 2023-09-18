@@ -49,19 +49,19 @@ func (i *indexSpec) UnmarshalJSON(data []byte) error {
 
 var _ driver.Finder = &db{}
 
-func (d *db) CreateIndex(_ context.Context, ddoc, name string, index interface{}, opts map[string]interface{}) error {
+func (d *db) CreateIndex(context.Context, string, string, interface{}, driver.Options) error {
 	return errFindNotImplemented
 }
 
-func (d *db) GetIndexes(_ context.Context, opts map[string]interface{}) ([]driver.Index, error) {
+func (d *db) GetIndexes(context.Context, driver.Options) ([]driver.Index, error) {
 	return nil, errFindNotImplemented
 }
 
-func (d *db) DeleteIndex(_ context.Context, ddoc, name string, opts map[string]interface{}) error {
+func (d *db) DeleteIndex(context.Context, string, string, driver.Options) error {
 	return errFindNotImplemented
 }
 
-func (d *db) Find(ctx context.Context, query interface{}, opts map[string]interface{}) (driver.Rows, error) {
+func (d *db) Find(ctx context.Context, query interface{}, _ driver.Options) (driver.Rows, error) {
 	if exists, _ := d.DBExists(ctx, d.dbName, nil); !exists {
 		return nil, statusError{status: http.StatusNotFound, error: errors.New("database does not exist")}
 	}
@@ -108,7 +108,7 @@ func (d *db) Find(ctx context.Context, query interface{}, opts map[string]interf
 	return rows, nil
 }
 
-func (d *db) Explain(_ context.Context, query interface{}, opts map[string]interface{}) (*driver.QueryPlan, error) {
+func (d *db) Explain(context.Context, interface{}, driver.Options) (*driver.QueryPlan, error) {
 	return nil, errFindNotImplemented
 }
 

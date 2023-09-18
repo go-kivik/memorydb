@@ -36,7 +36,7 @@ const (
 	Vendor  = "Kivik Memory Adaptor"
 )
 
-func (d *memDriver) NewClient(name string, _ map[string]interface{}) (driver.Client, error) {
+func (d *memDriver) NewClient(name string, _ driver.Options) (driver.Client, error) {
 	return &client{
 		version: &driver.Version{
 			Version:     Version,
@@ -47,7 +47,7 @@ func (d *memDriver) NewClient(name string, _ map[string]interface{}) (driver.Cli
 	}, nil
 }
 
-func (c *client) AllDBs(_ context.Context, _ map[string]interface{}) ([]string, error) {
+func (c *client) AllDBs(context.Context, driver.Options) ([]string, error) {
 	dbs := make([]string, 0, len(c.dbs))
 	for k := range c.dbs {
 		dbs = append(dbs, k)
@@ -55,7 +55,7 @@ func (c *client) AllDBs(_ context.Context, _ map[string]interface{}) ([]string, 
 	return dbs, nil
 }
 
-func (c *client) DBExists(_ context.Context, dbName string, _ map[string]interface{}) (bool, error) {
+func (c *client) DBExists(_ context.Context, dbName string, _ driver.Options) (bool, error) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	_, ok := c.dbs[dbName]
@@ -71,7 +71,7 @@ var (
 	}
 )
 
-func (c *client) CreateDB(ctx context.Context, dbName string, options map[string]interface{}) error {
+func (c *client) CreateDB(ctx context.Context, dbName string, options driver.Options) error {
 	if exists, _ := c.DBExists(ctx, dbName, options); exists {
 		return statusError{status: http.StatusPreconditionFailed, error: errors.New("database exists")}
 	}
@@ -89,7 +89,7 @@ func (c *client) CreateDB(ctx context.Context, dbName string, options map[string
 	return nil
 }
 
-func (c *client) DestroyDB(ctx context.Context, dbName string, options map[string]interface{}) error {
+func (c *client) DestroyDB(ctx context.Context, dbName string, options driver.Options) error {
 	if exists, _ := c.DBExists(ctx, dbName, options); !exists {
 		return statusError{status: http.StatusNotFound, error: errors.New("database does not exist")}
 	}
@@ -102,7 +102,7 @@ func (c *client) DestroyDB(ctx context.Context, dbName string, options map[strin
 	return nil
 }
 
-func (c *client) DB(dbName string, options map[string]interface{}) (driver.DB, error) {
+func (c *client) DB(dbName string, options driver.Options) (driver.DB, error) {
 	return &db{
 		client: c,
 		dbName: dbName,
