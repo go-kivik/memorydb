@@ -5,7 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"regexp"
 	"strings"
@@ -38,7 +38,7 @@ func (d *db) Get(ctx context.Context, docID string, opts map[string]interface{})
 		if doc, found := d.db.getRevision(docID, rev); found {
 			return &driver.Document{
 				Rev:  rev,
-				Body: ioutil.NopCloser(bytes.NewReader(doc.data)),
+				Body: io.NopCloser(bytes.NewReader(doc.data)),
 			}, nil
 		}
 		return nil, statusError{status: http.StatusNotFound, error: errors.New("missing")}
@@ -49,7 +49,7 @@ func (d *db) Get(ctx context.Context, docID string, opts map[string]interface{})
 	}
 	return &driver.Document{
 		Rev:  fmt.Sprintf("%d-%s", last.ID, last.Rev),
-		Body: ioutil.NopCloser(bytes.NewReader(last.data)),
+		Body: io.NopCloser(bytes.NewReader(last.data)),
 	}, nil
 }
 
