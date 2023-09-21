@@ -1,3 +1,4 @@
+// Deprecated: Use [github.com/go-kivik/kivik/v4/x/memorydb] instead.
 module github.com/go-kivik/memorydb/v4
 
 go 1.20
