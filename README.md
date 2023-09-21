@@ -1,3 +1,7 @@
+This code has moved to [github.com/go-kivik/kivik/v4/x/memorydb](https://github.com/go-kivik/kivik/tree/master/x/memorydb).
+
+<hr>
+
 [![Build Status](https://travis-ci.org/go-kivik/memorydb.svg?branch=master)](https://travis-ci.org/go-kivik/memorydb) [![Codecov](https://img.shields.io/codecov/c/github/go-kivik/memorydb.svg?style=flat)](https://codecov.io/gh/go-kivik/memorydb) [![GoDoc](https://godoc.org/github.com/go-kivik/memorydb?status.svg)](http://godoc.org/github.com/go-kivik/memorydb)
 
 # Kivik MemoryDB
